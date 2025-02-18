@@ -4,6 +4,8 @@ import {
   PermissionFlagsBits,
   SlashCommandBuilder,
   TextChannel,
+  time,
+  TimestampStyles,
 } from 'discord.js';
 import config from '~/config';
 import type { Command } from '~/types/command';
@@ -61,7 +63,7 @@ export default {
       return await sendError(intr, error.message, { deferred: true });
     }
 
-    const msg = await intr.followUp({
+    await intr.followUp({
       embeds: [
         {
           color: config.embedColor,
@@ -70,9 +72,10 @@ export default {
           Command executed by ${intr.user}
           ${
             secondsBeforeAutoDelete
-              ? `This message will be auto-deleted <t:${
-                  Math.floor(Date.now() / 1000) + secondsBeforeAutoDelete
-                }:R>`
+              ? `This message will be auto-deleted ${time(
+                  Math.floor(Date.now() / 1000) + secondsBeforeAutoDelete,
+                  TimestampStyles.RelativeTime
+                )}`
               : ''
           }
         `,
@@ -84,7 +87,7 @@ export default {
 
     setTimeout(async () => {
       try {
-        await msg.delete();
+        await intr.deleteReply();
       } catch {
         // Do nothing
       }
