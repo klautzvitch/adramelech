@@ -15,6 +15,7 @@ export class CustomClient extends Client {
   commands: Collection<string, Command> = new Collection();
   events: Collection<string, Event> = new Collection();
   components: Collection<string, Component> = new Collection();
+  cooldowns: Collection<string, Collection<string, number>> = new Collection();
 }
 
 const client = new CustomClient({

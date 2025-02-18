@@ -1,27 +1,54 @@
-import { Events, type Interaction } from 'discord.js';
+import {
+  ButtonInteraction,
+  ChatInputCommandInteraction,
+  Collection,
+  Events,
+  InteractionType,
+  MessageContextMenuCommandInteraction,
+  UserContextMenuCommandInteraction,
+  type AnySelectMenuInteraction,
+  type Interaction,
+} from 'discord.js';
 import type { Event } from '~/types/event';
 import type { CustomClient } from '..';
 import { sendError } from '~/utils/sendError';
+import type { Command } from '~/types/command';
+import type { Component } from '~/types/component';
+import config from '~/config';
+
+type CommandInteraction =
+  | ChatInputCommandInteraction
+  | MessageContextMenuCommandInteraction
+  | UserContextMenuCommandInteraction;
+type ComponentInteraction = AnySelectMenuInteraction | ButtonInteraction;
 
 export default {
   name: Events.InteractionCreate,
   async execute(intr: Interaction) {
     const client = intr.client as CustomClient;
 
-    if (intr.isCommand()) await handleCommands(intr, client);
-    else if (intr.isMessageComponent()) await handleComponents(intr, client);
-    else await sendError(intr, 'Unknown interaction type');
+    switch (intr.type) {
+      case InteractionType.ApplicationCommand:
+        await handleCommands(intr, client);
+        break;
+      case InteractionType.MessageComponent:
+        await handleComponents(intr, client);
+        break;
+      default:
+        await sendError(intr, 'Unknown interaction type');
+        break;
+    }
   },
 } as Event;
 
-async function handleCommands(intr: Interaction, client: CustomClient) {
-  if (!intr.isCommand()) return;
-
+async function handleCommands(intr: CommandInteraction, client: CustomClient) {
   const command = client.commands.get(intr.commandName);
   if (!command) {
     await sendError(intr, 'Command not found');
     return;
   }
+
+  if (isOnCooldown(client, intr, command, intr.commandName)) return;
 
   const commandType = command.data.toJSON().type;
   if (intr.commandType !== commandType) {
@@ -43,14 +70,17 @@ async function handleCommands(intr: Interaction, client: CustomClient) {
   );
 }
 
-async function handleComponents(intr: Interaction, client: CustomClient) {
-  if (!intr.isMessageComponent()) return;
-
+async function handleComponents(
+  intr: ComponentInteraction,
+  client: CustomClient
+) {
   const component = client.components.get(intr.customId);
   if (!component) {
     await sendError(intr, 'Component not found');
     return;
   }
+
+  if (isOnCooldown(client, intr, component, intr.customId)) return;
 
   if (intr.componentType !== component.type) {
     await handleTypeMismatch(
@@ -69,6 +99,36 @@ async function handleComponents(intr: Interaction, client: CustomClient) {
     () => component.execute(intr),
     intr
   );
+}
+
+function isOnCooldown(
+  client: CustomClient,
+  intr: Interaction,
+  item: Command | Component,
+  name: string
+): boolean {
+  if (!item.cooldown || process.env.NODE_ENV === 'development') return false;
+
+  const cooldowns = client.cooldowns.get(name) ?? new Collection();
+  client.cooldowns.set(name, cooldowns);
+
+  const now = Date.now();
+  const timestamps = client.cooldowns.get(name)!;
+  const cooldownAmount =
+    (typeof item.cooldown === 'boolean'
+      ? config.defaultCooldownSeconds
+      : item.cooldown) * 1000;
+
+  const userCooldown = timestamps.get(intr.user.id);
+  if (userCooldown && now < userCooldown) {
+    const remainingTime = Math.round((userCooldown - now) / 1000);
+    sendError(intr, `Your on cooldown for ${remainingTime} seconds`);
+    return true;
+  }
+
+  cooldowns.set(intr.user.id, now + cooldownAmount);
+  setTimeout(() => timestamps.delete(intr.user.id), cooldownAmount);
+  return false;
 }
 
 async function handleTypeMismatch(

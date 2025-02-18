@@ -6,6 +6,7 @@ const configSchema = z.object({
   presence: z.custom<PresenceData>(),
   embedColor: z.number(),
   authorUrl: z.string().url(),
+  defaultCooldownSeconds: z.string().transform(Number),
 });
 
 export default configSchema.parse({
@@ -20,4 +21,5 @@ export default configSchema.parse({
   },
   embedColor: 13346551,
   authorUrl: process.env.AUTHOR_URL,
-} as z.infer<typeof configSchema>);
+  defaultCooldownSeconds: process.env.DEFAULT_COOLDOWN_SECONDS,
+} as z.input<typeof configSchema>);

@@ -13,6 +13,7 @@ const commandFunction = z
 export const commandSchema = z.object({
   data: z.custom<SlashCommandBuilder | ContextMenuCommandBuilder>(),
   uses: z.array(z.string()).optional(),
+  cooldown: z.union([z.number(), z.boolean()]).optional(),
   execute: z.union([commandFunction, z.array(commandFunction)]),
 });
 
