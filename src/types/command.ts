@@ -4,6 +4,7 @@ import type {
   SlashCommandBuilder,
 } from 'discord.js';
 import { z } from 'zod';
+import type { Precondition } from './precondition';
 
 const commandFunction = z
   .function()
@@ -14,6 +15,7 @@ export const commandSchema = z.object({
   data: z.custom<SlashCommandBuilder | ContextMenuCommandBuilder>(),
   uses: z.array(z.string()).optional(),
   cooldown: z.union([z.number(), z.boolean()]).optional(),
+  preconditions: z.array(z.custom<Precondition>()).optional(),
   execute: z.union([commandFunction, z.array(commandFunction)]),
 });
 

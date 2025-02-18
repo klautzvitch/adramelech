@@ -10,13 +10,8 @@ import {
 export async function sendError(
   interaction: BaseInteraction,
   description: string = 'An error occurred while executing the command.',
-  options: {
-    deferred?: boolean;
-    toDm?: boolean;
-  } = {}
+  toDm = false
 ) {
-  const { deferred = false, toDm = false } = options;
-
   const response: InteractionReplyOptions = {
     embeds: [
       {
@@ -40,7 +35,7 @@ export async function sendError(
 
   if (interaction.isRepliable()) {
     try {
-      if (deferred) {
+      if (intr.deferred || intr.replied) {
         // Delete the original response, because we need it to be ephemeral
         // This has the drawback of losing the mention of the invoked command
         const msg = await intr.followUp('opps...');

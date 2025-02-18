@@ -16,11 +16,11 @@ import type { Command } from '~/types/command';
 import type { Component } from '~/types/component';
 import config from '~/config';
 
-type CommandInteraction =
+export type CommandInteraction =
   | ChatInputCommandInteraction
   | MessageContextMenuCommandInteraction
   | UserContextMenuCommandInteraction;
-type ComponentInteraction = AnySelectMenuInteraction | ButtonInteraction;
+export type ComponentInteraction = AnySelectMenuInteraction | ButtonInteraction;
 
 export default {
   name: Events.InteractionCreate,
@@ -49,6 +49,7 @@ async function handleCommands(intr: CommandInteraction, client: CustomClient) {
   }
 
   if (isOnCooldown(client, intr, command, intr.commandName)) return;
+  if (!(await handlePreconditions(intr, command))) return;
 
   const commandType = command.data.toJSON().type;
   if (intr.commandType !== commandType) {
@@ -81,6 +82,7 @@ async function handleComponents(
   }
 
   if (isOnCooldown(client, intr, component, intr.customId)) return;
+  if (!(await handlePreconditions(intr, component))) return;
 
   if (intr.componentType !== component.type) {
     await handleTypeMismatch(
@@ -99,6 +101,18 @@ async function handleComponents(
     () => component.execute(intr),
     intr
   );
+}
+
+async function handlePreconditions(
+  intr: CommandInteraction | ComponentInteraction,
+  item: Command | Component
+): Promise<boolean> {
+  if (item.preconditions) {
+    for (const precondition of item.preconditions) {
+      if (!(await precondition(intr))) return false;
+    }
+  }
+  return true;
 }
 
 function isOnCooldown(

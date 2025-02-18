@@ -48,9 +48,7 @@ export default {
       .map((msg) => msg.id);
 
     if (!messages?.length)
-      return await sendError(intr, 'No messages found to delete', {
-        deferred: true,
-      });
+      return await sendError(intr, 'No messages found to delete');
 
     let deleted: number;
     try {
@@ -60,7 +58,7 @@ export default {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       error: any
     ) {
-      return await sendError(intr, error.message, { deferred: true });
+      return await sendError(intr, error.message);
     }
 
     await intr.followUp({

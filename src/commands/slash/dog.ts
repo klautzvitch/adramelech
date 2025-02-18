@@ -3,6 +3,7 @@ import ky from 'ky';
 import { z } from 'zod';
 import config from '~/config';
 import type { Command } from '~/types/command';
+import { sendError } from '~/utils/sendError';
 
 const schema = z.object({
   status: z.literal('success'),
@@ -23,7 +24,7 @@ export default {
       .json();
     const { data, error } = schema.safeParse(response);
     if (error) {
-      return await intr.editReply('Failed to fetch image');
+      return await sendError(intr, 'Failed to fetch a dog image');
     }
 
     await intr.followUp({

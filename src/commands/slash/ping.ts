@@ -23,8 +23,8 @@ export default {
         new ActionRowBuilder<ButtonBuilder>({
           components: [
             new ButtonBuilder({
-              customId: 'ping',
-              label: 'Ping',
+              customId: 'velocity',
+              label: 'Velocity',
               style: ButtonStyle.Primary,
             }),
             new ButtonBuilder({
