@@ -5,6 +5,7 @@ import {
   Events,
   InteractionType,
   MessageContextMenuCommandInteraction,
+  ModalSubmitInteraction,
   UserContextMenuCommandInteraction,
   type AnySelectMenuInteraction,
   type Interaction,
@@ -15,6 +16,7 @@ import { sendError } from '~/utils/sendError';
 import type { Command } from '~/types/command';
 import type { Component } from '~/types/component';
 import config from '~/config';
+import type { Modal } from '~/types/modal';
 
 export type CommandInteraction =
   | ChatInputCommandInteraction
@@ -33,6 +35,9 @@ export default <Event>{
         break;
       case InteractionType.MessageComponent:
         await handleComponents(intr, client);
+        break;
+      case InteractionType.ModalSubmit:
+        await handleModals(intr, client);
         break;
       default:
         await sendError(intr, 'Unknown interaction type');
@@ -103,9 +108,41 @@ async function handleComponents(
   );
 }
 
+async function handleModals(
+  intr: ModalSubmitInteraction,
+  client: CustomClient
+) {
+  const modal = client.modals.get(intr.customId);
+  if (!modal) {
+    await sendError(intr, 'Modal not found');
+    return;
+  }
+
+  if (isOnCooldown(client, intr, modal, intr.customId)) return;
+  if (!(await handlePreconditions(intr, modal))) return;
+
+  if (intr.type !== InteractionType.ModalSubmit) {
+    await handleTypeMismatch(
+      'modal',
+      intr.customId,
+      intr.type,
+      InteractionType.ModalSubmit,
+      intr
+    );
+    return;
+  }
+
+  await executeInteraction(
+    'modal',
+    intr.customId,
+    () => modal.execute(intr),
+    intr
+  );
+}
+
 async function handlePreconditions(
-  intr: CommandInteraction | ComponentInteraction,
-  item: Command | Component
+  intr: CommandInteraction | ComponentInteraction | ModalSubmitInteraction,
+  item: Command | Component | Modal
 ): Promise<boolean> {
   if (item.preconditions) {
     for (const precondition of item.preconditions) {
@@ -118,7 +155,7 @@ async function handlePreconditions(
 function isOnCooldown(
   client: CustomClient,
   intr: Interaction,
-  item: Command | Component,
+  item: Command | Component | Modal,
   name: string
 ): boolean {
   if (!item.cooldown || process.env.NODE_ENV === 'development') return false;

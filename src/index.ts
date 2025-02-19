@@ -10,11 +10,13 @@ import { commandSchema, type Command } from '~/types/command';
 import { eventSchema, type Event } from '~/types/event';
 import findAllFiles from '~/utils/findRecursively';
 import { componentSchema, type Component } from '~/types/component';
+import { modalSchema, type Modal } from '~/types/modal';
 
 export class CustomClient extends Client {
   commands: Collection<string, Command> = new Collection();
   events: Collection<string, Event> = new Collection();
   components: Collection<string, Component> = new Collection();
+  modals: Collection<string, Modal> = new Collection();
   cooldowns: Collection<string, Collection<string, number>> = new Collection();
 }
 
@@ -99,6 +101,27 @@ async function loadComponents() {
   }
 }
 
-await Promise.all([loadCommands(), loadEvents(), loadComponents()]);
+async function loadModals() {
+  const modalsFiles = await findAllFiles(path.join(__dirname, 'modals'));
+  for (const file of modalsFiles) {
+    const rawModal = (await import(file)).default;
+
+    const { data: modal, success, error } = modalSchema.safeParse(rawModal);
+    if (!success) {
+      console.error(`Invalid modal file: ${file}`);
+      console.error(error.errors);
+      continue;
+    }
+
+    client.modals.set(modal.customId, modal);
+  }
+}
+
+await Promise.all([
+  loadCommands(),
+  loadEvents(),
+  loadComponents(),
+  loadModals(),
+]);
 
 client.login(config.token);
