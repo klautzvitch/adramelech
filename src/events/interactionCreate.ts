@@ -22,7 +22,7 @@ export type CommandInteraction =
   | UserContextMenuCommandInteraction;
 export type ComponentInteraction = AnySelectMenuInteraction | ButtonInteraction;
 
-export default {
+export default <Event>{
   name: Events.InteractionCreate,
   async execute(intr: Interaction) {
     const client = intr.client as CustomClient;
@@ -39,7 +39,7 @@ export default {
         break;
     }
   },
-} as Event;
+};
 
 async function handleCommands(intr: CommandInteraction, client: CustomClient) {
   const command = client.commands.get(intr.commandName);
@@ -167,8 +167,14 @@ async function executeInteraction(
 ) {
   try {
     await fn();
-  } catch (error) {
-    await sendError(intr, `Error executing ${interactionType}`);
+  } catch (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    error: any
+  ) {
+    await sendError(
+      intr,
+      `Error executing ${interactionType}: ${error.message}`
+    );
     console.error(`Error executing ${interactionType} ${name}`);
     console.error(error);
   }

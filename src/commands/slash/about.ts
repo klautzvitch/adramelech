@@ -11,7 +11,7 @@ import type { CustomClient } from '~';
 import config from '~/config';
 import type { Command } from '~/types/command';
 
-export default {
+export default <Command>{
   data: new SlashCommandBuilder()
     .setName('about')
     .setDescription('About the bot'),
@@ -84,4 +84,4 @@ export default {
       ],
     });
   },
-} as Command;
+};

@@ -13,7 +13,7 @@ import {
 import config from '~/config';
 import type { Command } from '~/types/command';
 
-export default [
+export default <Array<Command>>[
   {
     data: new SlashCommandBuilder()
       .setName('avatar')
@@ -24,7 +24,7 @@ export default [
     async execute(intr: ChatInputCommandInteraction) {
       const user = intr.options.getUser('user') ?? intr.user;
 
-      await avatarHelper(intr, user);
+      await helper(intr, user);
     },
   },
   {
@@ -32,11 +32,11 @@ export default [
       .setName('Avatar')
       .setType(ApplicationCommandType.User),
     execute: async (intr: UserContextMenuCommandInteraction) =>
-      await avatarHelper(intr, intr.targetUser),
+      await helper(intr, intr.targetUser),
   },
-] as Array<Command>;
+];
 
-function avatarHelper(interaction: CommandInteraction, user: User) {
+function helper(interaction: CommandInteraction, user: User) {
   return interaction.reply({
     embeds: [
       {

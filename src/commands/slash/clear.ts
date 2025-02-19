@@ -11,7 +11,7 @@ import config from '~/config';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default {
+export default <Command>{
   data: new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Clears the chat')
@@ -27,7 +27,7 @@ export default {
     )
     .addNumberOption((option) =>
       option
-        .setName('seconds_before_auto_delete')
+        .setName('seconds-before-auto-delete')
         .setDescription(
           'The amount of seconds before the bot response is auto-deleted'
         )
@@ -37,9 +37,9 @@ export default {
   async execute(intr: ChatInputCommandInteraction) {
     await intr.deferReply();
 
-    const amount = intr.options.getNumber('amount')!;
+    const amount = intr.options.getNumber('amount', true);
     const secondsBeforeAutoDelete =
-      intr.options.getNumber('seconds_before_auto_delete') ?? 0;
+      intr.options.getNumber('seconds-before-auto-delete') ?? 0;
 
     const messages = (await intr.channel!.messages.fetch({ limit: amount }))
       .toJSON()
@@ -91,4 +91,4 @@ export default {
       }
     }, secondsBeforeAutoDelete * 1000);
   },
-} as Command;
+};

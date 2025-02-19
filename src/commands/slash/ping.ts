@@ -2,12 +2,13 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import config from '~/config';
 import type { Command } from '~/types/command';
 
-export default {
+export default <Command>{
   data: new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Replies with Pong!'),
@@ -37,4 +38,4 @@ export default {
       ],
     });
   },
-} as Command;
+};

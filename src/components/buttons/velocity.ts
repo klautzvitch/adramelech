@@ -9,7 +9,7 @@ import {
 import config from '~/config';
 import type { Component } from '~/types/component';
 
-export default {
+export default <Component>{
   customId: 'velocity',
   type: ComponentType.Button,
   async execute(intr: ButtonInteraction) {
@@ -40,4 +40,4 @@ export default {
       ],
     });
   },
-} as Component;
+};
