@@ -14,7 +14,7 @@ export default <Command>{
   data: new SlashCommandBuilder()
     .setName('dog')
     .setDescription('Get a random dog image'),
-  uses: ['dog.ceo'],
+  uses: ['Dog API'],
   cooldown: true,
   async execute(intr) {
     await intr.deferReply();

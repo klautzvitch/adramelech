@@ -31,6 +31,7 @@ export default <Command>{
         .setDescription('Whether to separate the records into individual rows')
     ),
   uses: ['da.gd'],
+  cooldown: true,
   async execute(intr: ChatInputCommandInteraction) {
     await intr.deferReply();
 

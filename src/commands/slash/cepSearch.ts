@@ -40,6 +40,8 @@ export default <Command>{
         .setDescription('The CEP to search for')
         .setRequired(true)
     ),
+  uses: ['BrasilAPI'],
+  cooldown: true,
   async execute(intr: ChatInputCommandInteraction) {
     await intr.deferReply();
     const cep = intr.options.getString('cep', true);

@@ -5,9 +5,11 @@ const configSchema = z.object({
   token: z.string(),
   presence: z.custom<PresenceData>(),
   embedColor: z.number(),
-  authorUrl: z.string().url(),
+  authorUrl: z.string().url().default('https://www.pudim.com.br'),
   repositoryUrl: z.string().url(),
   defaultCooldownSeconds: z.string().transform(Number),
+  feedbackWebhook: z.string().url(),
+  userAgent: z.string().default('adramelech'),
 });
 
 export default configSchema.parse({
@@ -24,4 +26,6 @@ export default configSchema.parse({
   authorUrl: process.env.AUTHOR_URL,
   repositoryUrl: process.env.REPOSITORY_URL,
   defaultCooldownSeconds: process.env.DEFAULT_COOLDOWN_SECONDS,
+  feedbackWebhook: process.env.FEEDBACK_WEBHOOK,
+  userAgent: process.env.USER_AGENT,
 } as z.input<typeof configSchema>);
