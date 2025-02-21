@@ -208,10 +208,7 @@ async function executeInteraction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: any
   ) {
-    await sendError(
-      intr,
-      `Error executing ${interactionType}: ${error.message}`
-    );
+    await sendError(intr, error.message);
     console.error(`Error executing ${interactionType} ${name}`);
     console.error(error);
   }
