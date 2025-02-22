@@ -102,6 +102,9 @@ export default <Command>{
               `,
             },
           ],
+          footer: {
+            text: 'Powered by BrasilAPI',
+          },
         },
       ],
       components: [

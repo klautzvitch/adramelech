@@ -137,6 +137,9 @@ export default <Command>{
               value: time(data.createdAt),
             },
           ],
+          footer: {
+            text: 'Powered by owo.vc',
+          },
         },
       ],
     });

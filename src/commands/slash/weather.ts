@@ -55,7 +55,7 @@ export default <Command>{
         .setRequired(true)
     ),
   cooldown: 10 * 60, // 10 minutes, because the API is expensive and I'm not rich
-  uses: ['OpenWeatherMap API'],
+  uses: ['OpenWeatherMap'],
   async execute(intr: ChatInputCommandInteraction) {
     if (!config.openWeatherKey)
       return await sendError(intr, 'OpenWeatherMap API key is not configured');

@@ -2,7 +2,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import config from '~/config';

@@ -177,6 +177,9 @@ async function repo(intr: ChatInputCommandInteraction) {
             value: licenseField,
           },
         ],
+        footer: {
+          text: 'Powered by GitHub API',
+        },
       },
     ],
     components: [
@@ -270,6 +273,9 @@ async function user(intr: ChatInputCommandInteraction) {
             value: socialField,
           },
         ],
+        footer: {
+          text: 'Powered by GitHub API',
+        },
       },
     ],
     components: [components],
