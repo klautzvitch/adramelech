@@ -6,6 +6,9 @@ import { sendError } from '~/utils/sendError';
 export default <Modal>{
   customId: 'feedback-modal',
   async execute(intr) {
+    if (!config.feedbackWebhook)
+      return await sendError(intr, 'Feedback is not configured');
+
     const message = intr.fields.getTextInputValue('message');
 
     const webhook = new WebhookClient({ url: config.feedbackWebhook });
