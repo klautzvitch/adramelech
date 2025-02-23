@@ -1,3 +1,5 @@
+import '~/instrument'; // Sentry, import this first
+
 import {
   Client,
   Collection,
