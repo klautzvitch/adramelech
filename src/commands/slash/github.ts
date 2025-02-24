@@ -129,18 +129,17 @@ async function repo(intr: ChatInputCommandInteraction) {
     `/repos/${user}/${repo}`,
     repositorySchema
   );
-  if (!response.success)
+  if (response.error)
     return await sendError(intr, 'Failed to get repository data');
-  const data = response.value;
+  const data = response.data;
 
   let licenseField = 'No License';
   if (data.license) {
     if (data.license.key === 'other') licenseField = 'Other';
     else {
       const license = await getLicense(data.license.key);
-      if (!license.success)
-        return await sendError(intr, 'Failed to get license');
-      licenseField = license.value;
+      if (license.error) return await sendError(intr, 'Failed to get license');
+      licenseField = license.data;
     }
   }
 
@@ -203,15 +202,13 @@ async function user(intr: ChatInputCommandInteraction) {
   const user = intr.options.getString('user', true);
 
   const response = await fetchGitHubData(`/users/${user}`, userSchema);
-  if (!response.success)
-    return await sendError(intr, 'Failed to get user data');
-  const data = response.value;
+  if (response.error) return await sendError(intr, 'Failed to get user data');
+  const data = response.data;
 
   const rawSocials = await getSocials(user);
-  if (!rawSocials.success)
-    return await sendError(intr, 'Failed to get socials');
+  if (rawSocials.error) return await sendError(intr, 'Failed to get socials');
 
-  const [socials, socialField] = rawSocials.value;
+  const [socials, socialField] = rawSocials.data;
 
   const components = new ActionRowBuilder<ButtonBuilder>();
   components.addComponents(
@@ -284,12 +281,11 @@ async function user(intr: ChatInputCommandInteraction) {
 
 async function getLicense(key: string): Promise<Result<string>> {
   const result = await fetchGitHubData(`/licenses/${key}`, licenseSchema);
-  if (!result.success) return result;
+  if (result.error) return result;
 
-  const { name, permissions, conditions, limitations } = result.value;
+  const { name, permissions, conditions, limitations } = result.data;
   return {
-    success: true,
-    value: `
+    data: `
     **Name:** ${v.titleCase(name)}
     **Permissions:** ${v.titleCase(permissions.join(', '))}
     **Conditions:** ${v.titleCase(conditions.join(', '))}
@@ -303,8 +299,8 @@ async function getSocials(user: string): Promise<Result<[Socials, string]>> {
     `/users/${user}/social_accounts`,
     socialsSchema
   );
-  if (!result.success) return result;
-  const socials = result.value;
+  if (result.error) return result;
+  const socials = result.data;
 
   const socialField = socials
     .map((social) => {
@@ -312,10 +308,7 @@ async function getSocials(user: string): Promise<Result<[Socials, string]>> {
     })
     .join('\n');
 
-  return {
-    success: true,
-    value: [socials, socialField],
-  };
+  return { data: [socials, socialField] };
 }
 
 async function fetchGitHubData<T>(
@@ -329,17 +322,9 @@ async function fetchGitHubData<T>(
       })
       .json();
     const result = schema.safeParse(response);
-    if (!result.success) {
-      return {
-        success: false,
-        error: Error('Failed to parse response'),
-      };
-    }
-    return { success: true, value: result.data };
+    if (!result.success) return { error: Error('Failed to parse response') };
+    return { data: result.data };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error : Error('Unknown error'),
-    };
+    return { error: error instanceof Error ? error : Error('Unknown error') };
   }
 }

@@ -53,18 +53,14 @@ export default <Command>{
 
     const target = intr.options.getString('target', true);
     const match = z.string().ip().safeParse(target);
-    const ip = match.success
-      ? {
-          success: true,
-          value: target,
-        }
+    const ip: Result<string> = match.success
+      ? { data: target }
       : await getIpFromDomain(target);
 
-    if (!ip.success)
-      return await sendError(intr, 'Failed to get IP from domain');
+    if (ip.error) return await sendError(intr, 'Failed to get IP from domain');
 
     const response = await ky
-      .get(`https://ipwho.is/${ip.value}`, {
+      .get(`https://ipwho.is/${ip.data}`, {
         headers: {
           'User-Agent': 'curl', // :3
         },
@@ -86,8 +82,8 @@ export default <Command>{
             {
               name: '> :zap: Main',
               value: `
-              **IP:** ${ip.value}
-              **Domain:** ${target === ip.value ? 'None' : target}
+              **IP:** ${ip.data}
+              **Domain:** ${target === ip.data ? 'None' : target}
               **Type:** ${data.type}
               `,
             },
@@ -145,11 +141,10 @@ export default <Command>{
 async function getIpFromDomain(domain: string): Promise<Result<string>> {
   const response = (await ky.get(`https://da.gd/host/${domain}`).text()).trim();
   if (!response || response.startsWith('No'))
-    return { success: false, error: new Error('Failed to get IP from domain') };
+    return { error: new Error('Failed to get IP from domain') };
 
   return {
-    success: true,
-    value: response.includes(',')
+    data: response.includes(',')
       ? response.substring(0, response.indexOf(','))
       : response,
   };
