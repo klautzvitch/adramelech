@@ -10,7 +10,7 @@ import path from 'path';
 import config from '~/config';
 import { commandSchema, type Command } from '~/types/command';
 import { eventSchema, type Event } from '~/types/event';
-import findAllFiles from '~/utils/findRecursively';
+import findRecursively from '~/utils/findRecursively';
 import { componentSchema, type Component } from '~/types/component';
 import { modalSchema, type Modal } from '~/types/modal';
 
@@ -34,7 +34,7 @@ const client = new CustomClient({
 });
 
 async function loadCommands() {
-  const commandsFiles = await findAllFiles(path.join(__dirname, 'commands'));
+  const commandsFiles = await findRecursively(path.join(__dirname, 'commands'));
   for (const file of commandsFiles) {
     const rawCommand = (await import(file)).default;
 
@@ -61,7 +61,7 @@ function validateAndSetCommands(rawCommand: unknown, file: string) {
 }
 
 async function loadEvents() {
-  const eventsFiles = await findAllFiles(path.join(__dirname, 'events'));
+  const eventsFiles = await findRecursively(path.join(__dirname, 'events'));
   for (const file of eventsFiles) {
     const rawEvent = (await import(file)).default;
 
@@ -82,7 +82,7 @@ async function loadEvents() {
 }
 
 async function loadComponents() {
-  const componentsFiles = await findAllFiles(
+  const componentsFiles = await findRecursively(
     path.join(__dirname, 'components')
   );
   for (const file of componentsFiles) {
@@ -104,7 +104,7 @@ async function loadComponents() {
 }
 
 async function loadModals() {
-  const modalsFiles = await findAllFiles(path.join(__dirname, 'modals'));
+  const modalsFiles = await findRecursively(path.join(__dirname, 'modals'));
   for (const file of modalsFiles) {
     const rawModal = (await import(file)).default;
 
