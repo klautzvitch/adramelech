@@ -14,7 +14,7 @@ const configSchema = z.object({
 });
 
 export default configSchema.parse({
-  token: process.env.BOT_TOKEN,
+  token: Bun.env.BOT_TOKEN,
   presence: {
     activities: [
       {
@@ -24,10 +24,10 @@ export default configSchema.parse({
     ],
   },
   embedColor: 13346551,
-  authorUrl: process.env.AUTHOR_URL,
-  repositoryUrl: process.env.REPOSITORY_URL,
-  defaultCooldownSeconds: process.env.DEFAULT_COOLDOWN_SECONDS,
-  feedbackWebhook: process.env.FEEDBACK_WEBHOOK,
-  userAgent: process.env.USER_AGENT,
-  openWeatherKey: process.env.OPENWEATHER_KEY,
+  authorUrl: Bun.env.AUTHOR_URL,
+  repositoryUrl: Bun.env.REPOSITORY_URL,
+  defaultCooldownSeconds: Bun.env.DEFAULT_COOLDOWN_SECONDS,
+  feedbackWebhook: Bun.env.FEEDBACK_WEBHOOK,
+  userAgent: Bun.env.USER_AGENT,
+  openWeatherKey: Bun.env.OPENWEATHER_KEY,
 } as z.input<typeof configSchema>);

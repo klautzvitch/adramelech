@@ -158,7 +158,7 @@ function isOnCooldown(
   item: Command | Component | Modal,
   name: string
 ): boolean {
-  if (!item.cooldown || process.env.NODE_ENV === 'development') return false;
+  if (!item.cooldown || Bun.env.NODE_ENV === 'development') return false;
 
   const cooldowns = client.cooldowns.get(name) ?? new Collection();
   client.cooldowns.set(name, cooldowns);

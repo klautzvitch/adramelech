@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/bun';
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  debug: process.env.NODE_ENV === 'development',
+  dsn: Bun.env.SENTRY_DSN,
+  enabled: Bun.env.NODE_ENV === 'production',
+  debug: Bun.env.NODE_ENV !== 'production',
   tracesSampleRate: 1.0, // Adjust in the future
 });
