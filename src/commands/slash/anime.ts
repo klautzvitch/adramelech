@@ -16,14 +16,12 @@ enum AnimeImageAgeRating {
   Explicit = 'explicit',
 }
 
-const animeImageSchema = z.object({
-  items: z.array(
-    z.object({
-      image_url: z.string().url(),
-      source: z.string().nullish(),
-    })
-  ),
-});
+const animeImageSchema = z.array(
+  z.object({
+    url: z.string().url(),
+    source_url: z.string().nullish(),
+  })
+);
 
 const nekoImageSchema = z.object({
   url: z.string().url(),
@@ -37,27 +35,22 @@ export default <Command>{
       group
         .setName('media')
         .setDescription('Anime media commands')
-        // At the time of implementation the API and the docs were down
-        // So I reused other project code that also uses the same API
-        // But there's a new version of the API, so the code might not work
-        // I'll just leave it here for reference
-        // I'll probably not remember to update, too bad :3
-        // .addSubcommand((subcommand) =>
-        //   subcommand
-        //     .setName('image')
-        //     .setDescription('Get a random anime image')
-        //     .addStringOption((option) =>
-        //       option
-        //         .setName('rating')
-        //         .setDescription('The rating of the image')
-        //         .setChoices(
-        //           Object.entries(AnimeImageAgeRating).map(([key, value]) => ({
-        //             name: key,
-        //             value,
-        //           }))
-        //         )
-        //     )
-        // )
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName('image')
+            .setDescription('Get a random anime image')
+            .addStringOption((option) =>
+              option
+                .setName('rating')
+                .setDescription('The rating of the image')
+                .setChoices(
+                  Object.entries(AnimeImageAgeRating).map(([key, value]) => ({
+                    name: key,
+                    value,
+                  }))
+                )
+            )
+        )
         .addSubcommand((subcommand) =>
           subcommand.setName('neko').setDescription('Get a random neko image')
         )
@@ -98,7 +91,7 @@ async function animeImage(intr: ChatInputCommandInteraction) {
       'This command can only be used in NSFW channels'
     );
 
-  const response = await ky(`https://api.nekosapi.com/v3/images/random`, {
+  const response = await ky(`https://api.nekosapi.com/v4/images/random`, {
     searchParams: {
       rating,
       limit: 1,
@@ -110,17 +103,15 @@ async function animeImage(intr: ChatInputCommandInteraction) {
   const { data, error } = animeImageSchema.safeParse(response);
   if (error) return await sendError(intr, error.message);
 
-  const [image] = data.items;
-
   let footer = '';
-  if (image.source) footer = `Source: ${image.source}\n`;
+  if (data[0].source_url) footer = `Source: ${data[0].source_url}\n`;
   footer += `Powered by NekosAPI`;
 
   await intr.followUp({
     embeds: [
       {
         color: config.embedColor,
-        image: { url: image.image_url },
+        image: { url: data[0].url },
         footer: { text: footer },
       },
     ],
