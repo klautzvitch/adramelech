@@ -63,7 +63,7 @@ export default <Command>{
             },
           ],
           footer: {
-            text: 'Made with ❤️ with discord.js',
+            text: 'Made with ❤️ using discord.js in 🇧🇷',
             icon_url: 'https://avatars.githubusercontent.com/u/26492485',
           },
         },
