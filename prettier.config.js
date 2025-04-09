@@ -1,5 +1,4 @@
-import type { Config } from 'prettier';
-
+/** @type {import('prettier').Config} */
 export default {
   tabWidth: 2,
   useTabs: false,
@@ -10,4 +9,4 @@ export default {
   bracketSpacing: true,
   arrowParens: 'always',
   endOfLine: 'lf',
-} satisfies Config;
+};
