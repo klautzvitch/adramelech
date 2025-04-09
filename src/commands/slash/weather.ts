@@ -34,7 +34,7 @@ const weatherSchema = z.object({
   wind: z.object({
     speed: z.number(),
     deg: z.number(),
-    gust: z.number(),
+    gust: z.number().optional(), // Present most of the time, but not always
   }),
 });
 
@@ -121,7 +121,7 @@ export default <Command>{
               value: `
               **Speed:** ${data.wind.speed} m/s
               **Direction:** ${data.wind.deg}°
-              **Gust:** ${data.wind.gust} m/s
+              **Gust:** ${data.wind.gust ? `${data.wind.gust} m/s` : 'N/A'}
               `,
             },
           ],
