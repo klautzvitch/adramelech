@@ -17,6 +17,7 @@ import type { Command } from '~/types/command';
 import type { Component } from '~/types/component';
 import type { Modal } from '~/types/modal';
 import env from '~/env';
+import logger from '~/logger';
 
 export type CommandInteraction =
   | ChatInputCommandInteraction
@@ -190,9 +191,9 @@ async function handleTypeMismatch(
   intr: Interaction
 ) {
   await sendError(intr, `${interactionType} type mismatch`);
-  console.error(`Error executing ${interactionType} ${name}`);
-  console.error(
-    `${interactionType} type mismatch: ${actualType} !== ${expectedType}`
+  logger.error(`Error executing ${interactionType} ${name}`);
+  logger.error(
+    `󱞩 ${interactionType} type mismatch: ${actualType} !== ${expectedType}`
   );
 }
 
@@ -209,7 +210,7 @@ async function executeInteraction(
     error: any
   ) {
     await sendError(intr, error.message);
-    console.error(`Error executing ${interactionType} ${name}`);
-    console.error(error);
+    logger.error(`Error executing ${interactionType} ${name}`);
+    logger.error(error);
   }
 }
