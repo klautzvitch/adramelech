@@ -7,7 +7,7 @@ import {
   time,
   TimestampStyles,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -64,7 +64,7 @@ export default <Command>{
     await intr.followUp({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           description: `
           Successfully cleared ${deleted} messages
           Command executed by ${intr.user}

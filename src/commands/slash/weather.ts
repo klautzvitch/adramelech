@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import ky from 'ky';
 import v from 'voca';
 import { z } from 'zod';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -57,7 +57,7 @@ export default <Command>{
   cooldown: 10 * 60, // 10 minutes, because the API is expensive and I'm not rich
   uses: ['OpenWeatherMap'],
   async execute(intr: ChatInputCommandInteraction) {
-    if (!config.openWeatherKey)
+    if (!env.OPENWEATHER_KEY)
       return await sendError(intr, 'OpenWeatherMap API key is not configured');
 
     await intr.deferReply();
@@ -68,7 +68,7 @@ export default <Command>{
     const geoUrl = new URL(`${BASE_URL}/geo/1.0/direct`);
     geoUrl.searchParams.append('q', `${city},${country}`);
     geoUrl.searchParams.append('limit', '1');
-    geoUrl.searchParams.append('appid', config.openWeatherKey);
+    geoUrl.searchParams.append('appid', env.OPENWEATHER_KEY);
 
     const geoResponse = await ky(geoUrl.toString()).json();
     const { data: geoData, error: geoError } = geoSchema
@@ -79,7 +79,7 @@ export default <Command>{
     const weatherUrl = new URL(`${BASE_URL}/data/2.5/weather`);
     weatherUrl.searchParams.append('lat', geoData[0].lat.toString());
     weatherUrl.searchParams.append('lon', geoData[0].lon.toString());
-    weatherUrl.searchParams.append('appid', config.openWeatherKey);
+    weatherUrl.searchParams.append('appid', env.OPENWEATHER_KEY);
     weatherUrl.searchParams.append('units', 'metric');
     weatherUrl.searchParams.append('lang', 'en');
     const response = await ky(weatherUrl.toString()).json();
@@ -93,7 +93,7 @@ export default <Command>{
     await intr.followUp({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: `Weather${data.name ? ` in ${data.name}` : ''}`,
           fields: [
             {

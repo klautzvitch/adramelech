@@ -15,8 +15,8 @@ import type { CustomClient } from '..';
 import { sendError } from '~/utils/sendError';
 import type { Command } from '~/types/command';
 import type { Component } from '~/types/component';
-import config from '~/config';
 import type { Modal } from '~/types/modal';
+import env from '~/env';
 
 export type CommandInteraction =
   | ChatInputCommandInteraction
@@ -167,7 +167,7 @@ function isOnCooldown(
   const timestamps = client.cooldowns.get(name)!;
   const cooldownAmount =
     (typeof item.cooldown === 'boolean'
-      ? config.defaultCooldownSeconds
+      ? env.DEFAULT_COOLDOWN_SECONDS
       : item.cooldown) * 1000;
 
   const userCooldown = timestamps.get(intr.user.id);

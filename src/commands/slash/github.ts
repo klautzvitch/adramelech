@@ -9,7 +9,7 @@ import ky from 'ky';
 import v from 'voca';
 import { z } from 'zod';
 import type { Result } from '~/common/result';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -146,7 +146,7 @@ async function repo(intr: ChatInputCommandInteraction) {
   await intr.followUp({
     embeds: [
       {
-        color: config.embedColor,
+        color: env.EMBED_COLOR,
         title: 'Repository Information',
         thumbnail: { url: data.owner.avatar_url },
         fields: [
@@ -239,7 +239,7 @@ async function user(intr: ChatInputCommandInteraction) {
   await intr.followUp({
     embeds: [
       {
-        color: config.embedColor,
+        color: env.EMBED_COLOR,
         title: 'User Information',
         thumbnail: { url: data.avatar_url },
         fields: [
@@ -318,7 +318,7 @@ async function fetchGitHubData<T>(
   try {
     const response = await ky
       .get(`${BASE_URL}${endpoint}`, {
-        headers: { 'User-Agent': config.userAgent },
+        headers: { 'User-Agent': env.USER_AGENT },
       })
       .json();
     const result = schema.safeParse(response);

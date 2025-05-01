@@ -5,7 +5,7 @@ import {
   time,
   TimestampStyles,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
 
@@ -21,7 +21,7 @@ export default <Command>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           author: {
             name: intr.guild!.name,
             icon_url: intr.guild!.iconURL() ?? undefined,

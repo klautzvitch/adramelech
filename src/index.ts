@@ -7,12 +7,15 @@ import {
   type ClientEvents,
 } from 'discord.js';
 import path from 'path';
-import config from '~/config';
 import { commandSchema, type Command } from '~/types/command';
 import { eventSchema, type Event } from '~/types/event';
 import findRecursively from '~/utils/findRecursively';
 import { componentSchema, type Component } from '~/types/component';
 import { modalSchema, type Modal } from '~/types/modal';
+import env from '~/env';
+import logger from '~/logger';
+import registerCommands from '~/utils/registerCommands';
+import chalk from 'chalk';
 
 export class CustomClient extends Client {
   commands: Collection<string, Command> = new Collection();
@@ -30,7 +33,14 @@ const client = new CustomClient({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.DirectMessages,
   ],
-  presence: config.presence,
+  presence: {
+    activities: [
+      {
+        type: env.PRESENCE_TYPE,
+        name: env.PRESENCE_NAME,
+      },
+    ],
+  },
 });
 
 async function loadCommands() {
@@ -48,13 +58,15 @@ async function loadCommands() {
 
     validateAndSetCommands(rawCommand, file);
   }
+
+  const commandsCount = await registerCommands(client);
+  logger.success(`${chalk.underline(commandsCount)} commands loaded`);
 }
 
 function validateAndSetCommands(rawCommand: unknown, file: string) {
   const { data: command, success, error } = commandSchema.safeParse(rawCommand);
   if (!success) {
-    console.error(`Invalid command file: ${file}`);
-    console.error(error.errors);
+    logger.error(`Invalid command file: ${file}`, error.errors);
     return;
   }
   client.commands.set(command.data.name, command as Command);
@@ -67,8 +79,7 @@ async function loadEvents() {
 
     const { data: event, success, error } = eventSchema.safeParse(rawEvent);
     if (!success) {
-      console.error(`Invalid event file: ${file}`);
-      console.error(error.errors);
+      logger.error(`Invalid event file: ${file}`, error.errors);
       continue;
     }
 
@@ -94,8 +105,7 @@ async function loadComponents() {
       error,
     } = componentSchema.safeParse(rawComponent);
     if (!success) {
-      console.error(`Invalid component file: ${file}`);
-      console.error(error.errors);
+      logger.error(`Invalid component file: ${file}`, error.errors);
       continue;
     }
 
@@ -110,8 +120,7 @@ async function loadModals() {
 
     const { data: modal, success, error } = modalSchema.safeParse(rawModal);
     if (!success) {
-      console.error(`Invalid modal file: ${file}`);
-      console.error(error.errors);
+      logger.error(`Invalid modal file: ${file}`, error.errors);
       continue;
     }
 
@@ -126,4 +135,4 @@ await Promise.all([
   loadModals(),
 ]);
 
-client.login(config.token);
+client.login(env.BOT_TOKEN);

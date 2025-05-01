@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 
 export default <Command>{
@@ -20,7 +20,7 @@ export default <Command>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: `Dice Roll`,
           description: `You rolled a ${result} on a ${sides}-sided dice`,
         },

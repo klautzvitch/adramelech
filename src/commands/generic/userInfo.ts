@@ -11,7 +11,7 @@ import {
   type CommandInteraction,
   type User,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
 
@@ -44,7 +44,7 @@ async function helper(intr: CommandInteraction, user: User) {
 
   const createdAt = toUnixTimestamps(user.createdTimestamp);
   const embed = new EmbedBuilder({
-    color: config.embedColor,
+    color: env.EMBED_COLOR,
     author: {
       name: user.username,
       icon_url: user.avatarURL() ?? undefined,

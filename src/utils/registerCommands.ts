@@ -1,21 +1,22 @@
 import { REST, Routes } from 'discord.js';
 import type { CustomClient } from '~';
-import config from '~/config';
+import env from '~/env';
+import logger from '~/logger';
 
-export default async function registerCommands(client: CustomClient) {
+export default async function registerCommands(
+  client: CustomClient
+): Promise<number> {
   const commands = client.commands.map((command) => command.data.toJSON());
-  const rest = new REST().setToken(config.token);
+  const rest = new REST().setToken(env.BOT_TOKEN);
 
   try {
-    console.log(`Started refreshing ${commands.length} application commands.`);
-
-    const data = (await rest.put(Routes.applicationCommands(client.user!.id), {
+    const data = (await rest.put(Routes.applicationCommands(env.BOT_ID), {
       body: commands,
     })) as unknown[];
 
-    console.log(`Successfully refreshed ${data.length} application commands.`);
+    return data.length;
   } catch (error) {
-    console.error('Failed to refresh application commands.', error);
+    logger.error('Error refreshing application commands.', error);
     throw error;
   }
 }

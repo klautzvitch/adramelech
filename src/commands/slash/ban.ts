@@ -8,7 +8,7 @@ import {
   SlashCommandBuilder,
   userMention,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -68,7 +68,7 @@ export default <Command>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'Member Banned',
           description: `User \`${user.username}\` has been banned`,
           fields: [

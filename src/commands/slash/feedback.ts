@@ -5,7 +5,7 @@ import {
   TextInputStyle,
   type ModalActionRowComponentBuilder,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -15,7 +15,7 @@ export default <Command>{
     .setDescription('Send feedback to the bot developers'),
   cooldown: 86400, // 1 day
   async execute(intr) {
-    if (!config.feedbackWebhook)
+    if (!env.FEEDBACK_WEBHOOK)
       return await sendError(intr, 'Feedback is not configured');
 
     await intr.showModal({

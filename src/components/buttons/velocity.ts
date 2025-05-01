@@ -6,7 +6,7 @@ import {
   ComponentType,
   EmbedBuilder,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Component } from '~/types/component';
 
 export default <Component>{
@@ -16,7 +16,7 @@ export default <Component>{
     await intr.update({
       embeds: [
         new EmbedBuilder({
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'Velocity',
           description: `Latency: ${intr.client.ws.ping}ms`,
         }),
@@ -33,7 +33,7 @@ export default <Component>{
             new ButtonBuilder({
               label: 'Author',
               style: ButtonStyle.Link,
-              url: config.authorUrl,
+              url: env.AUTHOR_URL,
             }),
           ],
         }),

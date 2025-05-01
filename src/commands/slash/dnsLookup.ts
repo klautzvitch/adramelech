@@ -4,7 +4,7 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
-import config from '~/config';
+import env from '~/env';
 import UnicodeSheet from '~/tools/UnicodeSheet';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
@@ -67,7 +67,7 @@ export default <Command>{
     await intr.followUp({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'DNS Lookup',
           description: `DNS records for \`${domain}\``,
           footer: {

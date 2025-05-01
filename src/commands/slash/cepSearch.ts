@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -79,7 +79,7 @@ export default <Command>{
     await intr.followUp({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: `CEP Search`,
           fields: [
             {

@@ -5,7 +5,7 @@ import {
 } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -97,7 +97,7 @@ async function animeImage(intr: ChatInputCommandInteraction) {
       limit: 1,
     },
     headers: {
-      'User-Agent': config.userAgent,
+      'User-Agent': env.USER_AGENT,
     },
   }).json();
   const { data, error } = animeImageSchema.safeParse(response);
@@ -110,7 +110,7 @@ async function animeImage(intr: ChatInputCommandInteraction) {
   await intr.followUp({
     embeds: [
       {
-        color: config.embedColor,
+        color: env.EMBED_COLOR,
         image: { url: data[0].url },
         footer: { text: footer },
       },
@@ -128,7 +128,7 @@ async function nekoImage(intr: ChatInputCommandInteraction) {
   await intr.followUp({
     embeds: [
       {
-        color: config.embedColor,
+        color: env.EMBED_COLOR,
         image: { url: data.url },
         footer: { text: 'Powered by nekos.life' },
       },

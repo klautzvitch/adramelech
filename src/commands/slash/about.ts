@@ -8,7 +8,7 @@ import {
   TimestampStyles,
 } from 'discord.js';
 import type { CustomClient } from '~';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 
 export default <Command>{
@@ -23,7 +23,7 @@ export default <Command>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           author: {
             name: owner.username,
             icon_url: owner.avatarURL() ?? undefined,
@@ -73,12 +73,12 @@ export default <Command>{
           new ButtonBuilder({
             label: 'Author',
             style: ButtonStyle.Link,
-            url: config.authorUrl,
+            url: env.AUTHOR_URL,
           }),
           new ButtonBuilder({
             label: 'Repository',
             style: ButtonStyle.Link,
-            url: config.repositoryUrl,
+            url: env.REPOSITORY_URL,
           })
         ),
       ],

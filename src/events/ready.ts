@@ -1,17 +1,26 @@
-import { ActivityType, Events } from 'discord.js';
+import { ActivityType, Events, version } from 'discord.js';
 import type { Event } from '~/types/event';
-import registerCommands from '~/utils/registerCommands';
 import type { CustomClient } from '~';
+import logger from '~/logger';
+import chalk from 'chalk';
 
 export default <Event>{
   name: Events.ClientReady,
   once: true,
   async execute(client: CustomClient) {
-    await registerCommands(client);
+    logger.log();
 
-    console.log(`Ready as ${client.user?.tag}`);
-    console.log(`API Version: ${client.options.rest?.version}`);
+    const library = `${chalk.magenta(' Discord.js')} ${chalk.reset.dim(version)}`;
+    const runtime = `${chalk.yellow(' Bun')} ${chalk.reset.dim(Bun.version)}`;
+    logger.log(`${library} / ${runtime}`);
+
+    logger.log(chalk.green(` Online as ${chalk.bold(client.user?.tag)}`));
+    logger.log(
+      `󱞩 API Version: ${chalk.underline(client.options.rest?.version)}`
+    );
     const presence = client.user!.presence.activities[0];
-    console.log(`Presence: ${ActivityType[presence.type]} ${presence.name}`);
+    logger.log(
+      chalk.blue(`󱞩 Presence: ${ActivityType[presence.type]} ${presence.name}`)
+    );
   },
 };

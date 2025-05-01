@@ -10,7 +10,7 @@ import {
   User,
   UserContextMenuCommandInteraction,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 
 export default <Array<Command>>[
@@ -40,7 +40,7 @@ function helper(interaction: CommandInteraction, user: User) {
   return interaction.reply({
     embeds: [
       {
-        color: config.embedColor,
+        color: env.EMBED_COLOR,
         title: `Avatar of ${user.username}`,
         image: {
           url: user.displayAvatarURL({ size: 1024 }),

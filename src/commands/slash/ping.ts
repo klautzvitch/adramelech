@@ -4,7 +4,7 @@ import {
   ButtonStyle,
   SlashCommandBuilder,
 } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 
 export default <Command>{
@@ -15,7 +15,7 @@ export default <Command>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'Pong!',
         },
       ],
@@ -30,7 +30,7 @@ export default <Command>{
             new ButtonBuilder({
               label: 'Author',
               style: ButtonStyle.Link,
-              url: config.authorUrl,
+              url: env.AUTHOR_URL,
             }),
           ],
         }),

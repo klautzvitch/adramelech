@@ -6,7 +6,7 @@ import {
 } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
-import config from '~/config';
+import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
@@ -103,7 +103,7 @@ export default <Command>{
           metadata,
         },
         headers: {
-          'User-Agent': config.userAgent,
+          'User-Agent': env.USER_AGENT,
         },
       })
       .json();
@@ -113,7 +113,7 @@ export default <Command>{
     await intr.followUp({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'Obfuscated URL',
           fields: [
             {

@@ -1,17 +1,17 @@
 import { codeBlock, MessageFlags, WebhookClient } from 'discord.js';
-import config from '~/config';
+import env from '~/env';
 import type { Modal } from '~/types/modal';
 import { sendError } from '~/utils/sendError';
 
 export default <Modal>{
   customId: 'feedback-modal',
   async execute(intr) {
-    if (!config.feedbackWebhook)
+    if (!env.FEEDBACK_WEBHOOK)
       return await sendError(intr, 'Feedback is not configured');
 
     const message = intr.fields.getTextInputValue('message');
 
-    const webhook = new WebhookClient({ url: config.feedbackWebhook });
+    const webhook = new WebhookClient({ url: env.FEEDBACK_WEBHOOK });
 
     try {
       await webhook.send({
@@ -19,7 +19,7 @@ export default <Modal>{
         avatarURL: intr.client.user.avatarURL() ?? undefined,
         embeds: [
           {
-            color: config.embedColor,
+            color: env.EMBED_COLOR,
             title: 'Feedback',
             description: `From \`${intr.user.username}\` (\`${intr.user.id}\`)`,
             fields: [
@@ -38,7 +38,7 @@ export default <Modal>{
     await intr.reply({
       embeds: [
         {
-          color: config.embedColor,
+          color: env.EMBED_COLOR,
           title: 'Feedback sent, thank you!',
         },
       ],
