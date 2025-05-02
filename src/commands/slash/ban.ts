@@ -1,7 +1,8 @@
+import { stripIndents } from 'common-tags';
 import {
   ChatInputCommandInteraction,
-  codeBlock,
   Colors,
+  ComponentType,
   InteractionContextType,
   MessageFlags,
   PermissionFlagsBits,
@@ -66,44 +67,64 @@ export default <Command>{
     }
 
     await intr.reply({
-      embeds: [
+      flags: ephemeral
+        ? [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2]
+        : MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Member Banned',
-          description: `User \`${user.username}\` has been banned`,
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> Reason',
-              value: codeBlock(reason),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # Member Banned
+              User \`${user.username}\` has been banned
+              ### :warning: Reason
+              \`\`\`${reason}\`\`\`
+              `,
             },
             {
-              name: '> Author',
-              value: userMention(intr.user.id),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              ### :shield: Author
+              ${userMention(intr.user.id)}
+              `,
             },
           ],
         },
       ],
-      flags: ephemeral ? MessageFlags.Ephemeral : undefined,
     });
 
     try {
       await user.send({
-        embeds: [
+        flags: MessageFlags.IsComponentsV2,
+        components: [
           {
-            color: Colors.Red,
-            title: 'You have been banned',
-            description: `You have been banned from \`${intr.guild!.name}\``,
-            fields: [
+            type: ComponentType.Container,
+            accent_color: Colors.Red,
+            components: [
               {
-                name: '> Reason',
-                value: codeBlock(reason),
+                type: ComponentType.TextDisplay,
+                content: stripIndents`
+                # You have been banned
+                ### Guild
+                \`\`\`${intr.guild!.name}\`\`\`
+                `,
+              },
+              {
+                type: ComponentType.TextDisplay,
+                content: stripIndents`
+                ### Reason
+                \`\`\`${reason}\`\`\`
+                `,
               },
             ],
           },
         ],
       });
     } catch {
-      await sendError(intr, 'Failed to notify the user');
+      await sendError(intr, 'Failed to notify the user about the ban');
     }
   },
 };

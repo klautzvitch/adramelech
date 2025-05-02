@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { ComponentType, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
 import env from '~/env';
@@ -26,11 +26,27 @@ export default <Command>{
     if (error) return await intr.followUp('Failed to fetch a cat image');
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          image: { url: data[0].url },
-          footer: { text: 'Powered by thecatapi.com' },
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.MediaGallery,
+              items: [
+                {
+                  media: {
+                    url: data[0].url,
+                  },
+                },
+              ],
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by thecatapi.com',
+            },
+          ],
         },
       ],
     });

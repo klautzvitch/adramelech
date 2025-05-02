@@ -1,6 +1,8 @@
+import { stripIndents } from 'common-tags';
 import {
   ChatInputCommandInteraction,
-  codeBlock,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
@@ -32,23 +34,29 @@ export default <Command>{
       return await sendError(intr, 'Failed to short URL');
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Short URL',
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> :outbox_tray: Original URL',
-              value: codeBlock(url),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # Short URL
+              ### :outbox_tray: Original URL
+              \`\`\`${url}\`\`\`
+              `,
             },
             {
-              name: '> :inbox_tray: Short URL',
-              value: codeBlock(response),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              ### :inbox_tray: Short URL
+              \`\`\`${response}\`\`\`
+              > Powered by is.gd
+              `,
             },
           ],
-          footer: {
-            text: 'Powered by is.gd',
-          },
         },
       ],
     });

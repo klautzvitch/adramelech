@@ -1,11 +1,11 @@
 import {
-  ActionRowBuilder,
   ApplicationCommandType,
-  ButtonBuilder,
   ButtonStyle,
   ChatInputCommandInteraction,
   CommandInteraction,
+  ComponentType,
   ContextMenuCommandBuilder,
+  MessageFlags,
   SlashCommandBuilder,
   User,
   UserContextMenuCommandInteraction,
@@ -36,31 +36,48 @@ export default <Array<Command>>[
   },
 ];
 
-function helper(interaction: CommandInteraction, user: User) {
-  return interaction.reply({
-    embeds: [
-      {
-        color: env.EMBED_COLOR,
-        title: `Avatar of ${user.username}`,
-        image: {
-          url: user.displayAvatarURL({ size: 1024 }),
-        },
-      },
-    ],
+async function helper(interaction: CommandInteraction, user: User) {
+  interaction.reply({
+    flags: MessageFlags.IsComponentsV2,
     components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        ['png', 'jpeg', 'webp', 'gif'].map(
-          (ext) =>
-            new ButtonBuilder({
-              label: ext.toUpperCase(),
-              style: ButtonStyle.Link,
-              url: user.displayAvatarURL({
-                extension: ext as 'png' | 'jpeg' | 'webp' | 'gif',
-                size: 4096,
-              }),
-            })
-        )
-      ),
+      {
+        type: ComponentType.Container,
+        accent_color: env.EMBED_COLOR,
+        components: [
+          {
+            type: ComponentType.TextDisplay,
+            content: `# Avatar of ${user.displayName}`,
+          },
+          {
+            type: ComponentType.MediaGallery,
+            items: [
+              {
+                media: {
+                  url: user.displayAvatarURL({ size: 1024 }),
+                },
+              },
+            ],
+          },
+          {
+            type: ComponentType.TextDisplay,
+            content: '> Different formats below',
+          },
+          {
+            type: ComponentType.ActionRow,
+            components: ['png', 'jpeg', 'webp', 'gif'].map((ext) => {
+              return {
+                type: ComponentType.Button,
+                style: ButtonStyle.Link,
+                label: ext.toUpperCase(),
+                url: user.displayAvatarURL({
+                  extension: ext as 'png' | 'jpeg' | 'webp' | 'gif',
+                  size: 4096,
+                }),
+              };
+            }),
+          },
+        ],
+      },
     ],
   });
 }

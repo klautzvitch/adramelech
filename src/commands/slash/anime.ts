@@ -1,11 +1,14 @@
 import {
   ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
   TextChannel,
 } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
 import env from '~/env';
+import StringBuilder from '~/tools/StringBuilder';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -58,18 +61,23 @@ export default <Command>{
   cooldown: true,
   uses: ['nekosapi.com', 'nekos.life'],
   async execute(intr: ChatInputCommandInteraction) {
-    if (intr.options.getSubcommandGroup() === 'media') {
-      switch (intr.options.getSubcommand()) {
-        case 'image':
-          return await animeImage(intr);
-        case 'neko':
-          return await nekoImage(intr);
-        default:
-          return await sendError(intr, 'Invalid subcommand');
-      }
-    }
+    const group = commands[intr.options.getSubcommandGroup() ?? ''];
+    if (!group) return await sendError(intr, 'Invalid subcommand group');
 
-    return await sendError(intr, 'Invalid subcommand group');
+    const command = group[intr.options.getSubcommand()];
+    if (!command) return await sendError(intr, 'Invalid subcommand');
+
+    await command(intr);
+  },
+};
+
+const commands: Record<
+  string,
+  Record<string, (intr: ChatInputCommandInteraction) => Promise<void>>
+> = {
+  media: {
+    image: animeImage,
+    neko: nekoImage,
   },
 };
 
@@ -91,7 +99,7 @@ async function animeImage(intr: ChatInputCommandInteraction) {
       'This command can only be used in NSFW channels'
     );
 
-  const response = await ky(`https://api.nekosapi.com/v4/images/random`, {
+  const response = await ky('https://api.nekosapi.com/v4/images/random', {
     searchParams: {
       rating,
       limit: 1,
@@ -103,16 +111,32 @@ async function animeImage(intr: ChatInputCommandInteraction) {
   const { data, error } = animeImageSchema.safeParse(response);
   if (error) return await sendError(intr, error.message);
 
-  let footer = '';
-  if (data[0].source_url) footer = `Source: ${data[0].source_url}\n`;
-  footer += `Powered by NekosAPI`;
+  const footer = new StringBuilder();
+  if (data[0].source_url) footer.appendLine(`> Source: ${data[0].source_url}`);
+  footer.append(`> Powered by NekosAPI`);
 
   await intr.followUp({
-    embeds: [
+    flags: MessageFlags.IsComponentsV2,
+    components: [
       {
-        color: env.EMBED_COLOR,
-        image: { url: data[0].url },
-        footer: { text: footer },
+        type: ComponentType.Container,
+        accent_color: env.EMBED_COLOR,
+        components: [
+          {
+            type: ComponentType.MediaGallery,
+            items: [
+              {
+                media: {
+                  url: data[0].url,
+                },
+              },
+            ],
+          },
+          {
+            type: ComponentType.TextDisplay,
+            content: footer.toString(),
+          },
+        ],
       },
     ],
   });
@@ -126,11 +150,27 @@ async function nekoImage(intr: ChatInputCommandInteraction) {
   if (error) return await sendError(intr, error.message);
 
   await intr.followUp({
-    embeds: [
+    flags: MessageFlags.IsComponentsV2,
+    components: [
       {
-        color: env.EMBED_COLOR,
-        image: { url: data.url },
-        footer: { text: 'Powered by nekos.life' },
+        type: ComponentType.Container,
+        accent_color: env.EMBED_COLOR,
+        components: [
+          {
+            type: ComponentType.MediaGallery,
+            items: [
+              {
+                media: {
+                  url: data.url,
+                },
+              },
+            ],
+          },
+          {
+            type: ComponentType.TextDisplay,
+            content: '> Powered by nekos.life',
+          },
+        ],
       },
     ],
   });

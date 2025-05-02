@@ -64,6 +64,9 @@ async function loadCommands() {
 }
 
 function validateAndSetCommands(rawCommand: unknown, file: string) {
+  // Ignore as it is probably a commented-out/archived command
+  if (rawCommand === undefined) return;
+
   const { data: command, success, error } = commandSchema.safeParse(rawCommand);
   if (!success) {
     logger.error(`Invalid command file: ${file}`, error.errors);

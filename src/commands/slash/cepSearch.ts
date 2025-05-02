@@ -1,8 +1,9 @@
+import { stripIndents } from 'common-tags';
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonStyle,
   ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
@@ -56,14 +57,7 @@ export default <Command>{
     if (error) return await sendError(intr, 'Failed to fetch CEP data');
 
     if (data.name) {
-      return await sendError(
-        intr,
-        `
-        **Name:** \`${data.name}\`
-        **Message:** \`${data.message}\`
-        **Type:** \`${data.type}\`
-        `
-      );
+      return await sendError(intr, JSON.stringify(data.name, null, 2));
     }
 
     const mapsUrl = new URL('https://www.google.com/maps/search/');
@@ -77,45 +71,48 @@ export default <Command>{
     );
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: `CEP Search`,
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> :zap: Main',
-              value: `
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # CEP Search
               **CEP:** \`${data.cep}\`
               **State:** \`${data.state}\`
               **City:** \`${data.city}\`
               **Neighborhood:** \`${data.neighborhood}\`
               **Street:** \`${data.street}\`
               **Service used:** \`${data.service}\`
-              `,
-            },
-            {
-              name: '> :earth_americas: Location',
-              value: `
+              ### Location
               **Type:** \`${data.location.type}\`
               **Latitude:** \`${data.location.coordinates.latitude ?? 'N/A'}\`
               **Longitude:** \`${data.location.coordinates.longitude ?? 'N/A'}\`
               `,
             },
+            {
+              type: ComponentType.ActionRow,
+              components: [
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  label: 'Open in Google Maps',
+                  url: mapsUrl.toString(),
+                  emoji: {
+                    name: '🌎',
+                  },
+                },
+              ],
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by BrasilAPI',
+            },
           ],
-          footer: {
-            text: 'Powered by BrasilAPI',
-          },
         },
-      ],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder({
-            label: 'Open in Google Maps',
-            style: ButtonStyle.Link,
-            url: mapsUrl.toString(),
-            emoji: '🌎',
-          })
-        ),
       ],
     });
   },

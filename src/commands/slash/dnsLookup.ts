@@ -1,6 +1,8 @@
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
@@ -65,14 +67,28 @@ export default <Command>{
     }
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'DNS Lookup',
-          description: `DNS records for \`${domain}\``,
-          footer: {
-            text: 'Powered by da.gd',
-          },
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: `# DNS records for \`${domain}\``,
+            },
+            {
+              type: ComponentType.File,
+              file: {
+                url: `attachment://records.txt`,
+                content_type: 'text/plain',
+              },
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: `> Powered by da.gd`,
+            },
+          ],
         },
       ],
       files: [

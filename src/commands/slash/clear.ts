@@ -1,6 +1,8 @@
 import {
   ChatInputCommandInteraction,
+  ComponentType,
   InteractionContextType,
+  MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
   TextChannel,
@@ -8,6 +10,7 @@ import {
   TimestampStyles,
 } from 'discord.js';
 import env from '~/env';
+import StringBuilder from '~/tools/StringBuilder';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
@@ -41,7 +44,11 @@ export default <Command>{
     const secondsBeforeAutoDelete =
       intr.options.getNumber('seconds-before-auto-delete') ?? 0;
 
-    const messages = (await intr.channel!.messages.fetch({ limit: amount }))
+    const messages = (
+      await intr.channel!.messages.fetch({
+        limit: amount === 100 ? amount : amount + 1, // Compensate for the command message
+      })
+    )
       .toJSON()
       .filter((msg) => Date.now() - msg.createdTimestamp < 1209600000) // 14 days
       .slice(1) // Skip the command message
@@ -61,22 +68,29 @@ export default <Command>{
       return await sendError(intr, error.message);
     }
 
+    const message = new StringBuilder();
+    message.appendLine(`# Successfully cleared ${deleted} messages`);
+    if (secondsBeforeAutoDelete)
+      message.appendLine(
+        `### This message will be auto-deleted ${time(
+          Math.floor(Date.now() / 1000) + secondsBeforeAutoDelete,
+          TimestampStyles.RelativeTime
+        )}`
+      );
+    message.appendLine(`> Command executed by ${intr.user}`);
+
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          description: `
-          Successfully cleared ${deleted} messages
-          Command executed by ${intr.user}
-          ${
-            secondsBeforeAutoDelete
-              ? `This message will be auto-deleted ${time(
-                  Math.floor(Date.now() / 1000) + secondsBeforeAutoDelete,
-                  TimestampStyles.RelativeTime
-                )}`
-              : ''
-          }
-        `,
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: message.toString(),
+            },
+          ],
         },
       ],
     });

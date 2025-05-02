@@ -1,10 +1,16 @@
 import {
   ApplicationCommandType,
+  AttachmentBuilder,
   ChatInputCommandInteraction,
-  codeBlock,
+  ComponentType,
+  ContainerBuilder,
   ContextMenuCommandBuilder,
-  EmbedBuilder,
+  FileBuilder,
+  MessageFlags,
+  SeparatorBuilder,
+  SeparatorSpacingSize,
   SlashCommandBuilder,
+  TextDisplayBuilder,
   time,
   TimestampStyles,
   UserContextMenuCommandInteraction,
@@ -14,6 +20,7 @@ import {
 import env from '~/env';
 import type { Command } from '~/types/command';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
+import { stripIndents } from 'common-tags';
 
 export default <Array<Command>>[
   {
@@ -43,55 +50,98 @@ async function helper(intr: CommandInteraction, user: User) {
     .catch(() => undefined);
 
   const createdAt = toUnixTimestamps(user.createdTimestamp);
-  const embed = new EmbedBuilder({
-    color: env.EMBED_COLOR,
-    author: {
-      name: user.username,
-      icon_url: user.avatarURL() ?? undefined,
-    },
-    fields: [
+
+  const container = new ContainerBuilder({
+    accent_color: env.EMBED_COLOR,
+    components: [
       {
-        name: '> ID',
-        value: codeBlock(user.id),
-        inline: true,
+        type: ComponentType.Section,
+        components: [
+          {
+            type: ComponentType.TextDisplay,
+            content: stripIndents`
+            # ${user.username}
+            ### **ID**
+            \`${user.id}\`
+            ### **Nickname**
+            \`${member?.nickname ?? 'None'}\`
+            ### **Created At**
+            ${`${time(createdAt, TimestampStyles.ShortDateTime)} (${time(
+              createdAt,
+              TimestampStyles.RelativeTime
+            )})`}
+            ### Download the raw user data below
+            `,
+          },
+        ],
+        accessory: {
+          type: ComponentType.Thumbnail,
+          media: {
+            url: user.displayAvatarURL({ size: 1024 }),
+          },
+        },
       },
       {
-        name: '> Nickname',
-        value: codeBlock(member?.nickname ?? 'None'),
-        inline: true,
-      },
-      {
-        name: '> Created At',
-        value: `${time(createdAt, TimestampStyles.ShortDateTime)} (${time(
-          createdAt,
-          TimestampStyles.RelativeTime
-        )})`,
+        type: ComponentType.File,
+        file: {
+          url: 'attachment://user.json',
+        },
       },
     ],
   });
 
-  if (!member) return await intr.reply({ embeds: [embed] });
+  const userFile = new AttachmentBuilder(
+    Buffer.from(JSON.stringify(user.toJSON(), null, 2)),
+    { name: 'user.json' }
+  );
+
+  if (!member) {
+    await intr.reply({
+      flags: [MessageFlags.IsComponentsV2],
+      components: [container],
+      files: [userFile],
+    });
+    return;
+  }
 
   const joinedAt = toUnixTimestamps(member.joinedTimestamp!);
   const roles = member.roles.cache.toJSON();
   const permissions = member.permissions.toArray();
-  embed.addFields(
-    {
-      name: '> Joined At',
-      value: `${time(joinedAt, TimestampStyles.ShortDateTime)} (${time(
+  container.components.push(
+    new SeparatorBuilder({ spacing: SeparatorSpacingSize.Large }),
+    new TextDisplayBuilder({
+      content: stripIndents`
+      ## Guild Info
+      ### **Joined At**
+      ${`${time(joinedAt, TimestampStyles.ShortDateTime)} (${time(
         joinedAt,
         TimestampStyles.RelativeTime
-      )})`,
-    },
-    {
-      name: '> Roles',
-      value: roles.join(', '),
-    },
-    {
-      name: `> Permissions`,
-      value: codeBlock(permissions.join(', ')),
-    }
+      )})`}
+      ### **Roles**
+      ${roles.length > 0 ? roles.join(', ') : 'None'}
+      ### **Permissions**
+      ${permissions.length > 0 ? `\`\`\`${permissions.join(', ')}\`\`\`` : 'None'}
+      `,
+    }),
+    new SeparatorBuilder({ divider: false }),
+    new TextDisplayBuilder({
+      content: '### Download the raw guild data below',
+    }),
+    new FileBuilder({
+      file: {
+        url: 'attachment://guild.json',
+      },
+    })
   );
 
-  await intr.reply({ embeds: [embed] });
+  const guildFile = new AttachmentBuilder(
+    Buffer.from(JSON.stringify(member.toJSON(), null, 2)),
+    { name: 'guild.json' }
+  );
+
+  await intr.reply({
+    flags: [MessageFlags.IsComponentsV2],
+    components: [container],
+    files: [userFile, guildFile],
+  });
 }

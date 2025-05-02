@@ -1,7 +1,9 @@
+import { stripIndents } from 'common-tags';
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
-  codeBlock,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
@@ -42,19 +44,35 @@ export default <Command>{
       return await sendError(intr, 'Invalid domain or IP address');
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Whois Lookup',
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> :mag: Target',
-              value: codeBlock(target),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # Whois Lookup
+              ### :mag: Target
+              \`\`\`${target}\`\`\`
+              `,
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: '### :page_with_curl: Response',
+            },
+            {
+              type: ComponentType.File,
+              file: {
+                url: 'attachment://whois.txt',
+              },
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by da.gd',
             },
           ],
-          footer: {
-            text: 'Powered by da.gd',
-          },
         },
       ],
       files: [

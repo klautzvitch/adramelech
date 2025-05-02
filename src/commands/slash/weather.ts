@@ -1,4 +1,10 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import {
+  ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from 'discord.js';
 import ky from 'ky';
 import v from 'voca';
 import { z } from 'zod';
@@ -91,14 +97,16 @@ export default <Command>{
       );
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: `Weather${data.name ? ` in ${data.name}` : ''}`,
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> :zap: Main',
-              value: `
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # Weather${data.name ? ` in ${data.name}` : ''}
               **Temperature:** ${data.main.temp}°C
               **Feels like:** ${data.main.feels_like}°C
               **Minimum temperature:** ${data.main.temp_min}°C
@@ -107,27 +115,20 @@ export default <Command>{
               **Humidity:** ${data.main.humidity}%
               **Sea level:** ${data.main.sea_level} hPa
               **Ground level:** ${data.main.grnd_level} hPa
-              `,
-            },
-            {
-              name: '> :cloud: Weather',
-              value: `
+              ### :cloud: Weather
               **Main:** ${data.weather[0].main}
               **Description:** ${v.titleCase(data.weather[0].description)}
-              `,
-            },
-            {
-              name: '> :dash: Wind',
-              value: `
+              ### :dash: Wind
               **Speed:** ${data.wind.speed} m/s
               **Direction:** ${data.wind.deg}°
               **Gust:** ${data.wind.gust ? `${data.wind.gust} m/s` : 'N/A'}
               `,
             },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by OpenWeatherMap',
+            },
           ],
-          footer: {
-            text: 'Powered by OpenWeatherMap',
-          },
         },
       ],
     });

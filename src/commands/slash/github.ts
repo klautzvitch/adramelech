@@ -1,9 +1,12 @@
+import { stripIndents } from 'common-tags';
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonStyle,
   ChatInputCommandInteraction,
+  ComponentType,
+  ContainerBuilder,
+  MessageFlags,
   SlashCommandBuilder,
+  type APIComponentInMessageActionRow,
 } from 'discord.js';
 import ky from 'ky';
 import v from 'voca';
@@ -21,7 +24,7 @@ const repositorySchema = z.object({
   html_url: z.string().url(),
   description: z.string().nullish(),
   fork: z.boolean(),
-  language: z.string(),
+  language: z.string().nullish(),
   stargazers_count: z.number(),
   watchers_count: z.number(),
   forks_count: z.number(),
@@ -40,6 +43,7 @@ const repositorySchema = z.object({
 
 const licenseSchema = z.object({
   name: z.string(),
+  html_url: z.string().url(),
   permissions: z.array(z.string()),
   conditions: z.array(z.string()),
   limitations: z.array(z.string()),
@@ -133,68 +137,120 @@ async function repo(intr: ChatInputCommandInteraction) {
     return await sendError(intr, 'Failed to get repository data');
   const data = response.data;
 
-  let licenseField = 'No License';
+  let license:
+    | {
+        content: string;
+        html_url?: string;
+      }
+    | undefined;
   if (data.license) {
-    if (data.license.key === 'other') licenseField = 'Other';
+    if (data.license.key === 'other') license = { content: 'Other' };
     else {
-      const license = await getLicense(data.license.key);
-      if (license.error) return await sendError(intr, 'Failed to get license');
-      licenseField = license.data;
+      const rawLicense = await getLicense(data.license.key);
+      if (rawLicense.error)
+        return await sendError(intr, 'Failed to get license');
+      license = rawLicense.data;
     }
   }
 
-  await intr.followUp({
-    embeds: [
+  const container = new ContainerBuilder({
+    accent_color: env.EMBED_COLOR,
+    components: [
       {
-        color: env.EMBED_COLOR,
-        title: 'Repository Information',
-        thumbnail: { url: data.owner.avatar_url },
-        fields: [
+        type: ComponentType.TextDisplay,
+        content: '# Repository Information',
+      },
+      {
+        type: ComponentType.TextDisplay,
+        content: stripIndents`
+        **Name:** \`${data.name}\`
+        **ID:** ${data.id}
+        **Description:** \`${data.description ?? 'N/A'}\`
+        **Fork:** ${data.fork ? 'Yes' : 'No'}
+        **Main Language:** ${data.language}
+        **Stars:** ${data.stargazers_count}
+        **Watchers:** ${data.watchers_count}
+        **Forks:** ${data.forks_count}
+        `,
+      },
+      {
+        type: ComponentType.ActionRow,
+        components: [
           {
-            name: '> :zap: Main',
-            value: `
-            **Name:** ${data.name}
-            **ID:** ${data.id}
-            **Description:** ${data.description ?? 'N/A'}
-            **Fork:** ${data.fork ? 'Yes' : 'No'}
-            **Main Language:** ${data.language}
-            **Stars:** ${data.stargazers_count}
-            **Watchers:** ${data.watchers_count}
-            **Forks:** ${data.forks_count}
-            `,
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            label: 'Repository',
+            url: data.html_url,
           },
+        ],
+      },
+      { type: ComponentType.Separator },
+      {
+        type: ComponentType.Section,
+        components: [
           {
-            name: '> :bust_in_silhouette: Owner',
-            value: `
-            **Username:** ${data.owner.login}
+            type: ComponentType.TextDisplay,
+            content: stripIndents`
+            ## Owner
+            **Username:** \`${data.owner.login}\`
             **ID:** ${data.owner.id}
             **Type:** ${data.owner.type}
             `,
           },
-          {
-            name: '> :scroll: License',
-            value: licenseField,
-          },
         ],
-        footer: {
-          text: 'Powered by GitHub API',
+        accessory: {
+          type: ComponentType.Thumbnail,
+          media: {
+            url: data.owner.avatar_url,
+          },
         },
       },
+      {
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            label: 'Github Profile',
+            url: `https://github.com/${data.owner.login}`,
+          },
+        ],
+      },
     ],
-    components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder({
-          label: 'Repository',
-          url: data.html_url,
-          style: ButtonStyle.Link,
-        }),
-        new ButtonBuilder({
-          label: 'Owner',
-          url: `https://github.com/${data.owner.login}`,
-          style: ButtonStyle.Link,
-        })
-      ),
-    ],
+  });
+
+  if (license) {
+    container.addSeparatorComponents({ type: ComponentType.Separator });
+    container.addTextDisplayComponents({
+      type: ComponentType.TextDisplay,
+      content: stripIndents`
+      ## License
+      ${license.content}
+      `,
+    });
+    if (license.html_url) {
+      container.addActionRowComponents({
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            label: 'License Page',
+            url: license.html_url,
+          },
+        ],
+      });
+    }
+  }
+
+  container.addTextDisplayComponents({
+    type: ComponentType.TextDisplay,
+    content: '> Powered by GitHub API',
+  });
+
+  await intr.followUp({
+    flags: MessageFlags.IsComponentsV2,
+    components: [container],
   });
 }
 
@@ -208,107 +264,131 @@ async function user(intr: ChatInputCommandInteraction) {
   const rawSocials = await getSocials(user);
   if (rawSocials.error) return await sendError(intr, 'Failed to get socials');
 
-  const [socials, socialField] = rawSocials.data;
+  const socials = rawSocials.data;
 
-  const components = new ActionRowBuilder<ButtonBuilder>();
-  components.addComponents(
-    new ButtonBuilder({
-      label: 'Profile',
-      url: data.html_url,
+  const userActionRow: APIComponentInMessageActionRow[] = [
+    {
+      type: ComponentType.Button,
       style: ButtonStyle.Link,
-    })
-  );
-  if (!v.isEmpty(data.blog ?? undefined))
-    components.addComponents(
-      new ButtonBuilder({
-        label: 'Website',
-        url: `https://${data.blog}`,
-        style: ButtonStyle.Link,
-      })
-    );
-  socials.forEach((social) =>
-    components.addComponents(
-      new ButtonBuilder({
-        label: social.provider,
-        url: social.url,
-        style: ButtonStyle.Link,
-      })
-    )
-  );
+      label: 'Github Profile',
+      url: data.html_url,
+    },
+  ];
+  if (!v.isEmpty(data.blog ?? undefined)) {
+    const url = data.blog!.startsWith('http')
+      ? data.blog!
+      : `http://${data.blog}`;
+    userActionRow.push({
+      type: ComponentType.Button,
+      style: ButtonStyle.Link,
+      label: 'Website',
+      url,
+    });
+  }
 
-  await intr.followUp({
-    embeds: [
+  const container = new ContainerBuilder({
+    accent_color: env.EMBED_COLOR,
+    components: [
       {
-        color: env.EMBED_COLOR,
-        title: 'User Information',
-        thumbnail: { url: data.avatar_url },
-        fields: [
+        type: ComponentType.TextDisplay,
+        content: '# User Information',
+      },
+      {
+        type: ComponentType.Section,
+        components: [
           {
-            name: '> :zap: Main',
-            value: `
-            **Username:** ${data.login}
+            type: ComponentType.TextDisplay,
+            content: stripIndents`
+            **Username:** \`${data.login}\`
             **ID:** ${data.id}
             **Type:** ${data.type}
-            **Name:** ${data.name ?? 'N/A'}
-            **Company:** ${data.company ?? 'N/A'}
-            **Website:** ${data.blog ?? 'N/A'}
-            **Location:** ${data.location ?? 'N/A'}
-            **Bio:** ${data.bio ?? 'N/A'}
+            **Name:** \`${data.name ?? 'N/A'}\`
+            **Company:** \`${data.company ?? 'N/A'}\`
+            **Website:** \`${data.blog || 'N/A'}\`
+            **Location:** \`${data.location ?? 'N/A'}\`
+            **Bio:** \`${data.bio ?? 'N/A'}\`
             `,
-          },
-          {
-            name: '> :bar_chart: Stats',
-            value: `
-            **Public Repos:** ${data.public_repos}
-            **Public Gists:** ${data.public_gists}
-            **Followers:** ${data.followers}
-            **Following:** ${data.following}
-            `,
-          },
-          {
-            name: '> :link: Socials',
-            value: socialField,
           },
         ],
-        footer: {
-          text: 'Powered by GitHub API',
+        accessory: {
+          type: ComponentType.Thumbnail,
+          media: {
+            url: data.avatar_url,
+          },
         },
       },
+      {
+        type: ComponentType.ActionRow,
+        components: userActionRow,
+      },
     ],
-    components: [components],
+  });
+
+  if (socials.length > 0) {
+    container.addActionRowComponents({
+      type: ComponentType.ActionRow,
+      components: socials.map((social) => ({
+        type: ComponentType.Button,
+        style: ButtonStyle.Link,
+        label: social.provider === 'Generic' ? 'Social' : social.provider,
+        url: social.url,
+      })),
+    });
+  }
+
+  container.addSeparatorComponents({ type: ComponentType.Separator });
+  container.addTextDisplayComponents({
+    type: ComponentType.TextDisplay,
+    content: stripIndents`
+    ## Stats
+    **Public Repos:** ${data.public_repos}
+    **Public Gists:** ${data.public_gists}
+    **Followers:** ${data.followers}
+    **Following:** ${data.following}
+    `,
+  });
+  container.addTextDisplayComponents({
+    type: ComponentType.TextDisplay,
+    content: '> Powered by GitHub API',
+  });
+
+  await intr.followUp({
+    flags: MessageFlags.IsComponentsV2,
+    components: [container],
   });
 }
 
-async function getLicense(key: string): Promise<Result<string>> {
+async function getLicense(key: string): Promise<
+  Result<{
+    content: string;
+    html_url: string;
+  }>
+> {
   const result = await fetchGitHubData(`/licenses/${key}`, licenseSchema);
   if (result.error) return result;
 
-  const { name, permissions, conditions, limitations } = result.data;
+  const { name, html_url, permissions, conditions, limitations } = result.data;
   return {
-    data: `
-    **Name:** ${v.titleCase(name)}
-    **Permissions:** ${v.titleCase(permissions.join(', '))}
-    **Conditions:** ${v.titleCase(conditions.join(', '))}
-    **Limitations:** ${v.titleCase(limitations.join(', '))}
-    `,
+    data: {
+      content: stripIndents`
+      **Name:** ${v.titleCase(name)}
+      **Permissions:** ${v.titleCase(permissions.join(', '))}
+      **Conditions:** ${v.titleCase(conditions.join(', '))}
+      **Limitations:** ${v.titleCase(limitations.join(', '))}
+      `,
+      html_url,
+    },
   };
 }
 
-async function getSocials(user: string): Promise<Result<[Socials, string]>> {
+async function getSocials(user: string): Promise<Result<Socials>> {
   const result = await fetchGitHubData(
     `/users/${user}/social_accounts`,
     socialsSchema
   );
   if (result.error) return result;
-  const socials = result.data;
 
-  const socialField = socials
-    .map((social) => {
-      return `**${social.provider}:** ${social.url}`;
-    })
-    .join('\n');
-
-  return { data: [socials, socialField] };
+  return { data: result.data };
 }
 
 async function fetchGitHubData<T>(

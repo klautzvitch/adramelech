@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { ComponentType, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import ky from 'ky';
 import { z } from 'zod';
 import env from '~/env';
@@ -14,7 +14,7 @@ export default <Command>{
   data: new SlashCommandBuilder()
     .setName('dog')
     .setDescription('Get a random dog image'),
-  uses: ['dig.ceo'],
+  uses: ['dog.ceo'],
   cooldown: true,
   async execute(intr) {
     await intr.deferReply();
@@ -26,15 +26,27 @@ export default <Command>{
     if (error) return await sendError(intr, 'Failed to fetch a dog image');
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          image: {
-            url: data.message,
-          },
-          footer: {
-            text: 'Powered by dog.ceo',
-          },
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.MediaGallery,
+              items: [
+                {
+                  media: {
+                    url: data.message,
+                  },
+                },
+              ],
+            },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by dog.ceo',
+            },
+          ],
         },
       ],
     });

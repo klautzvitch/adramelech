@@ -1,6 +1,9 @@
+import { stripIndents } from 'common-tags';
 import {
-  codeBlock,
+  AttachmentBuilder,
+  ComponentType,
   InteractionContextType,
+  MessageFlags,
   SlashCommandBuilder,
   time,
   TimestampStyles,
@@ -19,58 +22,65 @@ export default <Command>{
     const createdAt = toUnixTimestamps(intr.guild!.createdTimestamp);
 
     await intr.reply({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          author: {
-            name: intr.guild!.name,
-            icon_url: intr.guild!.iconURL() ?? undefined,
-          },
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> Owner',
-              value: codeBlock(`${owner.user.tag} (${owner.id})`),
+              type: ComponentType.Section,
+              components: [
+                {
+                  type: ComponentType.TextDisplay,
+                  content: stripIndents`
+                  # ${intr.guild!.name}
+                  ### **Owner**
+                  \`${owner.user.tag}\` (\`${owner.id}\`)
+                  ### **ID**
+                  \`${intr.guild!.id}\`
+                  ### **Members**
+                  \`${intr.guild!.memberCount.toString()}\`
+                  ### **Roles**
+                  \`${intr.guild!.roles.cache.size.toString()}\`
+                  ### **Channels**
+                  \`${intr.guild!.channels.cache.size.toString()}\`
+                  ### **Boosts**
+                  \`${intr.guild!.premiumSubscriptionCount} Boosts${
+                    intr.guild!.premiumTier > 0
+                      ? ` ${intr.guild!.premiumTier}`
+                      : ''
+                  }\`
+                  ### **Created At**
+                  ${time(createdAt, TimestampStyles.LongDateTime)} (${time(
+                    createdAt,
+                    TimestampStyles.RelativeTime
+                  )})
+                  ### Download the raw guild data below
+                  `,
+                },
+              ],
+              accessory: {
+                type: ComponentType.Thumbnail,
+                media: {
+                  url: intr.guild!.iconURL()!,
+                },
+              },
             },
             {
-              name: '> ID',
-              value: codeBlock(intr.guild!.id),
-              inline: true,
-            },
-            {
-              name: '> Members',
-              value: codeBlock(intr.guild!.memberCount.toString()),
-              inline: true,
-            },
-            {
-              name: '> Roles',
-              value: codeBlock(intr.guild!.roles.cache.size.toString()),
-              inline: true,
-            },
-            {
-              name: '> Channels',
-              value: codeBlock(intr.guild!.channels.cache.size.toString()),
-              inline: true,
-            },
-            {
-              name: '> Boosts',
-              value: codeBlock(
-                `${intr.guild!.premiumSubscriptionCount} Boosts${
-                  intr.guild!.premiumTier > 0
-                    ? ` ${intr.guild!.premiumTier}`
-                    : ''
-                }`
-              ),
-              inline: true,
-            },
-            {
-              name: '> Created At',
-              value: `${time(createdAt, TimestampStyles.LongDateTime)} (${time(
-                createdAt,
-                TimestampStyles.RelativeTime
-              )})`,
+              type: ComponentType.File,
+              file: {
+                url: 'attachment://guild.json',
+              },
             },
           ],
         },
+      ],
+      files: [
+        new AttachmentBuilder(
+          Buffer.from(JSON.stringify(intr.guild?.toJSON(), null, 2)),
+          { name: 'guild.json' }
+        ),
       ],
     });
   },

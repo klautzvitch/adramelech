@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from 'discord.js';
 import env from '~/env';
 import type { Command } from '~/types/command';
 
@@ -18,11 +23,17 @@ export default <Command>{
     const result = Math.floor(Math.random() * sides) + 1;
 
     await intr.reply({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: `Dice Roll`,
-          description: `You rolled a ${result} on a ${sides}-sided dice`,
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: `# You rolled a ${result} on a ${sides}-sided dice\n`,
+            },
+          ],
         },
       ],
     });

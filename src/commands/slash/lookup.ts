@@ -1,8 +1,9 @@
+import { stripIndents } from 'common-tags';
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonStyle,
   ChatInputCommandInteraction,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 import ky from 'ky';
@@ -74,26 +75,28 @@ export default <Command>{
     mapsUrl.searchParams.append('query', `${data.latitude},${data.longitude}`);
 
     await intr.followUp({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Lookup',
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> :zap: Main',
-              value: `
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              # Lookup
               **IP:** ${ip.data}
               **Domain:** ${target === ip.data ? 'None' : target}
               **Type:** ${data.type}
               `,
             },
+            { type: ComponentType.Separator },
             {
-              name: '> :earth_americas: Location',
-              value: `
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              ## Location
               **Continent:** ${data.continent}
-              **Country:** ${
-                data.country
-              } :flag_${data.country_code.toLowerCase()}:
+              **Country:** ${data.country} :flag_${data.country_code.toLowerCase()}:
               **Region:** ${data.region}
               **City:** ${data.city}
               **Latitude:** ${data.latitude}
@@ -102,37 +105,44 @@ export default <Command>{
               `,
             },
             {
-              name: '> :satellite: Connection',
-              value: `
+              type: ComponentType.ActionRow,
+              components: [
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  label: 'Open in Google Maps',
+                  url: mapsUrl.toString(),
+                  emoji: { name: '🌎' },
+                },
+              ],
+            },
+            { type: ComponentType.Separator },
+            {
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              ## Connection
               **ASN:** ${data.connection.asn}
               **Organization:** ${data.connection.org}
               **ISP:** ${data.connection.isp}
               **Domain:** ${data.connection.domain}
               `,
             },
+            { type: ComponentType.Separator },
             {
-              name: '> :clock1: Timezone',
-              value: `
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+              ## Timezone
               **ID:** ${data.timezone.id}
               **Offset:** ${data.timezone.offset}
               **UTC:** ${data.timezone.utc}
               `,
             },
+            {
+              type: ComponentType.TextDisplay,
+              content: '> Powered by ipwhois.io and da.gd',
+            },
           ],
-          footer: {
-            text: 'Powered by ipwhois.io and da.gd',
-          },
         },
-      ],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder({
-            label: 'Open in Google Maps',
-            style: ButtonStyle.Link,
-            url: mapsUrl.toString(),
-            emoji: '🌎',
-          })
-        ),
       ],
     });
   },

@@ -1,4 +1,9 @@
-import { MessageFlags, userMention, type TextChannel } from 'discord.js';
+import {
+  ComponentType,
+  MessageFlags,
+  userMention,
+  type TextChannel,
+} from 'discord.js';
 import env from '~/env';
 import type { Modal } from '~/types/modal';
 import { sendError } from '~/utils/sendError';
@@ -10,19 +15,37 @@ export default <Modal>{
 
     try {
       const channel = intr.channel as TextChannel;
-      await channel.send(`${message}\n> ${userMention(intr.user.id)}`);
+      await channel.send({
+        flags: MessageFlags.IsComponentsV2,
+        components: [
+          {
+            type: ComponentType.TextDisplay,
+            content: `\`\`\`${message}\`\`\``,
+          },
+          {
+            type: ComponentType.TextDisplay,
+            content: `> ${userMention(intr.user.id)}`,
+          },
+        ],
+      });
     } catch {
       return await sendError(intr, 'Failed to send message.');
     }
 
     await intr.reply({
-      embeds: [
+      flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Message Sent',
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: '# Message sent successfully.',
+            },
+          ],
         },
       ],
-      flags: MessageFlags.Ephemeral,
     });
   },
 };

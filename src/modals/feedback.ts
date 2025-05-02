@@ -1,5 +1,7 @@
-import { codeBlock, MessageFlags, WebhookClient } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { ComponentType, MessageFlags, WebhookClient } from 'discord.js';
 import env from '~/env';
+import logger from '~/logger';
 import type { Modal } from '~/types/modal';
 import { sendError } from '~/utils/sendError';
 
@@ -17,32 +19,32 @@ export default <Modal>{
       await webhook.send({
         username: 'Adramelech Feedback',
         avatarURL: intr.client.user.avatarURL() ?? undefined,
-        embeds: [
-          {
-            color: env.EMBED_COLOR,
-            title: 'Feedback',
-            description: `From \`${intr.user.username}\` (\`${intr.user.id}\`)`,
-            fields: [
-              {
-                name: '> Message',
-                value: codeBlock(message),
-              },
-            ],
-          },
-        ],
+        content: stripIndents`
+        # Feedback
+        From \`${intr.user.username}\` (\`${intr.user.id}\`)
+        ### Message
+        \`\`\`${message}\`\`\`
+        `,
       });
-    } catch {
+    } catch (error) {
+      logger.warn('Failed to send feedback', error);
       return await sendError(intr, 'Failed to send feedback.');
     }
 
     await intr.reply({
-      embeds: [
+      flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Feedback sent, thank you!',
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: '# Feedback sent, thank you!',
+            },
+          ],
         },
       ],
-      flags: MessageFlags.Ephemeral,
     });
   },
 };

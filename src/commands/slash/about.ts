@@ -1,8 +1,8 @@
+import { stripIndents } from 'common-tags';
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonStyle,
-  codeBlock,
+  ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
   time,
   TimestampStyles,
@@ -21,66 +21,100 @@ export default <Command>{
     const owner = await client.users.fetch(info!.owner!.id);
 
     await intr.reply({
-      embeds: [
+      flags: MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          author: {
-            name: owner.username,
-            icon_url: owner.avatarURL() ?? undefined,
-          },
-          title: 'About',
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> Commands',
-              value: `Currently, there are \`${client.commands.size}\` commands available.`,
+              type: ComponentType.Section,
+              components: [
+                {
+                  type: ComponentType.TextDisplay,
+                  content: stripIndents`
+                  # About the bot
+                  \`\`\`${client.user?.username}\`\`\`
+                  `,
+                },
+              ],
+              accessory: {
+                type: ComponentType.Thumbnail,
+                media: {
+                  url: client.user!.displayAvatarURL({ size: 1024 }),
+                },
+              },
             },
             {
-              name: '> Running on',
-              value: `Bun ${Bun.version} on ${process.platform} ${process.arch}`,
+              type: ComponentType.ActionRow,
+              components: [
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  label: 'Repository',
+                  url: env.REPOSITORY_URL,
+                },
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  label: 'Support',
+                  url: env.SUPPORT_URL,
+                },
+              ],
+            },
+            { type: ComponentType.Separator },
+            {
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+                > **Commands**
+                Currently, there are \`${client.commands.size}\` commands available.
+                > **Running on**
+                Bun \`${Bun.version}\` on \`${process.platform} ${process.arch}\`
+                > **Uptime**
+                ${time(
+                  Math.floor(Date.now() / 1000 - process.uptime()),
+                  TimestampStyles.RelativeTime
+                )}
+                > **Memory Usage**
+                \`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB\`
+                > **Guilds**
+                \`${client.guilds.cache.size}\`
+                > **Users**
+                \`${client.users.cache.size}\`
+              `,
+            },
+            { type: ComponentType.Separator },
+            {
+              type: ComponentType.Section,
+              components: [
+                {
+                  type: ComponentType.TextDisplay,
+                  content: stripIndents`
+                  # Author
+                  \`\`\`${owner.username}\`\`\`
+                  `,
+                },
+              ],
+              accessory: {
+                type: ComponentType.Thumbnail,
+                media: {
+                  url: owner.displayAvatarURL({ size: 1024 }),
+                },
+              },
             },
             {
-              name: '> Uptime',
-              value: time(
-                Math.floor(Date.now() / 1000 - process.uptime()),
-                TimestampStyles.RelativeTime
-              ),
-            },
-            {
-              name: '> Memory Usage',
-              value: codeBlock(
-                `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(
-                  2
-                )} MB`
-              ),
-            },
-            {
-              name: '> Guilds',
-              value: codeBlock(client.guilds.cache.size.toString()),
-            },
-            {
-              name: '> Users',
-              value: codeBlock(client.users.cache.size.toString()),
+              type: ComponentType.ActionRow,
+              components: [
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  label: 'Website',
+                  url: env.AUTHOR_URL,
+                },
+              ],
             },
           ],
-          footer: {
-            text: 'Made with ❤️ using discord.js in 🇧🇷',
-            icon_url: 'https://avatars.githubusercontent.com/u/26492485',
-          },
         },
-      ],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder({
-            label: 'Author',
-            style: ButtonStyle.Link,
-            url: env.AUTHOR_URL,
-          }),
-          new ButtonBuilder({
-            label: 'Repository',
-            style: ButtonStyle.Link,
-            url: env.REPOSITORY_URL,
-          })
-        ),
       ],
     });
   },

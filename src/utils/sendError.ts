@@ -1,6 +1,8 @@
+import { stripIndents } from 'common-tags';
 import {
   Colors,
   CommandInteraction,
+  ComponentType,
   MessageComponentInteraction,
   MessageFlags,
   type BaseInteraction,
@@ -13,14 +15,24 @@ export async function sendError(
   toDm = false
 ) {
   const response: InteractionReplyOptions = {
-    embeds: [
+    components: [
       {
-        color: Colors.Red,
-        title: 'Error',
-        description,
+        type: ComponentType.Container,
+        accentColor: Colors.Red,
+        components: [
+          {
+            type: ComponentType.TextDisplay,
+            content: stripIndents`
+            # Error
+            \`\`\`
+            ${description}
+            \`\`\`
+            `,
+          },
+        ],
       },
     ],
-    flags: MessageFlags.Ephemeral,
+    flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
   };
 
   if (toDm) {

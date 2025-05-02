@@ -1,7 +1,8 @@
+import { stripIndents } from 'common-tags';
 import {
   ChatInputCommandInteraction,
-  codeBlock,
   Colors,
+  ComponentType,
   InteractionContextType,
   MessageFlags,
   PermissionFlagsBits,
@@ -60,37 +61,57 @@ export default <Command>{
     }
 
     await intr.reply({
-      embeds: [
+      flags: ephemeral
+        ? [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral]
+        : MessageFlags.IsComponentsV2,
+      components: [
         {
-          color: env.EMBED_COLOR,
-          title: 'Member Kicked',
-          description: `User \`${user.tag}\` has been kicked.`,
-          fields: [
+          type: ComponentType.Container,
+          accent_color: env.EMBED_COLOR,
+          components: [
             {
-              name: '> Reason',
-              value: codeBlock(reason),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+                # Member Kicked
+                User \`${user.username}\` has been kicked
+                ### :warning: **Reason**
+                \`\`\`${reason}\`\`\`
+              `,
             },
             {
-              name: '> Author',
-              value: userMention(intr.user.id),
+              type: ComponentType.TextDisplay,
+              content: stripIndents`
+                ### :shield: Author
+                ${userMention(intr.user.id)}
+              `,
             },
           ],
         },
       ],
-      flags: ephemeral ? MessageFlags.Ephemeral : undefined,
     });
 
     try {
       await user.send({
-        embeds: [
+        flags: MessageFlags.IsComponentsV2,
+        components: [
           {
-            color: Colors.Red,
-            title: 'You have been kicked',
-            description: `You have been kicked from \`${intr.guild!.name}\``,
-            fields: [
+            type: ComponentType.Container,
+            accent_color: Colors.Red,
+            components: [
               {
-                name: '> Reason',
-                value: codeBlock(reason),
+                type: ComponentType.TextDisplay,
+                content: stripIndents`
+                # You have been kicked
+                ### Guild
+                \`\`\`${intr.guild!.name}\`\`\`
+                `,
+              },
+              {
+                type: ComponentType.TextDisplay,
+                content: stripIndents`
+                ### Reason
+                \`\`\`${reason}\`\`\`
+                `,
               },
             ],
           },
