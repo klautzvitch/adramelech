@@ -66,20 +66,20 @@ export default <Command>{
             {
               type: ComponentType.TextDisplay,
               content: stripIndents`
-                > **Commands**
+                ### Commands
                 Currently, there are \`${client.commands.size}\` commands available.
-                > **Running on**
+                ### Running on
                 Bun \`${Bun.version}\` on \`${process.platform} ${process.arch}\`
-                > **Uptime**
+                ### Uptime
                 ${time(
                   Math.floor(Date.now() / 1000 - process.uptime()),
                   TimestampStyles.RelativeTime
                 )}
-                > **Memory Usage**
+                ### Memory Usage
                 \`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB\`
-                > **Guilds**
+                ### Guilds
                 \`${client.guilds.cache.size}\`
-                > **Users**
+                ### Users
                 \`${client.users.cache.size}\`
               `,
             },
