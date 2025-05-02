@@ -18,7 +18,7 @@ const envSchema = z.object({
 });
 
 function validateEnv() {
-  const result = envSchema.passthrough().safeParse(process.env);
+  const result = envSchema.passthrough().safeParse(Bun.env);
   if (!result.success) {
     const u = chalk.underline;
     for (const error of result.error.errors) {

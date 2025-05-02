@@ -15,7 +15,6 @@ import { modalSchema, type Modal } from '~/types/modal';
 import env from '~/env';
 import logger from '~/logger';
 import registerCommands from '~/utils/registerCommands';
-import chalk from 'chalk';
 
 export class CustomClient extends Client {
   commands: Collection<string, Command> = new Collection();
@@ -59,8 +58,7 @@ async function loadCommands() {
     validateAndSetCommands(rawCommand, file);
   }
 
-  const commandsCount = await registerCommands(client);
-  logger.success(`${chalk.underline(commandsCount)} commands loaded`);
+  await registerCommands(client);
 }
 
 function validateAndSetCommands(rawCommand: unknown, file: string) {
