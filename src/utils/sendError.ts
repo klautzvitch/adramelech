@@ -15,24 +15,22 @@ export async function sendError(
   toDm = false
 ) {
   const response: InteractionReplyOptions = {
+    flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
     components: [
       {
         type: ComponentType.Container,
-        accentColor: Colors.Red,
+        accent_color: Colors.Red,
         components: [
           {
             type: ComponentType.TextDisplay,
             content: stripIndents`
             # Error
-            \`\`\`
-            ${description}
-            \`\`\`
+            \`\`\`${description}\`\`\`
             `,
           },
         ],
       },
     ],
-    flags: [MessageFlags.Ephemeral, MessageFlags.IsComponentsV2],
   };
 
   if (toDm) {
