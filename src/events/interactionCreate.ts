@@ -25,7 +25,7 @@ export type CommandInteraction =
   | UserContextMenuCommandInteraction;
 export type ComponentInteraction = AnySelectMenuInteraction | ButtonInteraction;
 
-export default <Event>{
+export const event = <Event>{
   name: Events.InteractionCreate,
   async execute(intr: Interaction) {
     const client = intr.client as CustomClient;

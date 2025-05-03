@@ -10,7 +10,7 @@ const schema = z.array(
   })
 );
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('cat')
     .setDescription('Get a random cat image'),

@@ -44,7 +44,7 @@ const weatherSchema = z.object({
   }),
 });
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('weather')
     .setDescription('Get the weather of a city')

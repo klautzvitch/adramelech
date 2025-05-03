@@ -11,7 +11,7 @@ import type { CustomClient } from '~';
 import env from '~/env';
 import type { Command } from '~/types/command';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('about')
     .setDescription('About the bot'),

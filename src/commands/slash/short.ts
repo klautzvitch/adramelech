@@ -11,7 +11,7 @@ import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('short')
     .setDescription('Short a URL')

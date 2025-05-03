@@ -22,7 +22,7 @@ import type { Command } from '~/types/command';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
 import { stripIndents } from 'common-tags';
 
-export default <Array<Command>>[
+export const commands = <Array<Command>>[
   {
     data: new SlashCommandBuilder()
       .setName('user-info')

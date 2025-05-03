@@ -10,7 +10,7 @@ const schema = z.object({
   message: z.string().url(),
 });
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('dog')
     .setDescription('Get a random dog image'),

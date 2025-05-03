@@ -13,7 +13,7 @@ import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('kick')
     .setDescription('Kick a member')
@@ -41,7 +41,7 @@ export default <Command>{
     if (user.id === intr.user.id)
       return await sendError(intr, "You can't kick yourself");
     if (user.id === intr.client.user.id)
-      return await sendError(intr, "You can't kick me 0w0");
+      return await sendError(intr, "You can't kick me UwU");
 
     if (user.id === intr.guild?.ownerId)
       return await sendError(intr, "You can't kick the owner of the server");

@@ -22,7 +22,7 @@ const badResponses = [
   'Did not get',
 ];
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('whois')
     .setDescription('Get information about a domain or IP address')

@@ -37,7 +37,7 @@ const schema = z.object({
   }),
 });
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('lookup')
     .setDescription('Lookup a domain or IP address')

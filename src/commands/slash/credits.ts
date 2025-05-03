@@ -11,7 +11,7 @@ import UnicodeSheet from '~/tools/UnicodeSheet';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('credits')
     .setDescription('List of all external APIs used by the bot')

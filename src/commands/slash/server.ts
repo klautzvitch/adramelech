@@ -12,7 +12,7 @@ import env from '~/env';
 import type { Command } from '~/types/command';
 import toUnixTimestamps from '~/utils/toUnixTimestamps';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('server')
     .setDescription('Replies with server info!')

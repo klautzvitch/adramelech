@@ -14,7 +14,7 @@ import StringBuilder from '~/tools/StringBuilder';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Clears the chat')

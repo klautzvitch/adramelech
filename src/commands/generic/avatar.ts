@@ -13,7 +13,7 @@ import {
 import env from '~/env';
 import type { Command } from '~/types/command';
 
-export default <Array<Command>>[
+export const commands = <Array<Command>>[
   {
     data: new SlashCommandBuilder()
       .setName('avatar')

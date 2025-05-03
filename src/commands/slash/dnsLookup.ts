@@ -17,7 +17,7 @@ type DnsRecord = {
   content: string;
 };
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('dns-lookup')
     .setDescription("Lookup a domain's DNS records")

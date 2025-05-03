@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { REST, Routes } from 'discord.js';
 import type { CustomClient } from '~';
 import env from '~/env';
@@ -13,7 +12,7 @@ export default async function registerCommands(client: CustomClient) {
       body: commands,
     })) as unknown[];
 
-    logger.success(`${chalk.underline(data.length)} commands loaded`);
+    logger.success(`${data.length} commands registered.`);
   } catch (error) {
     logger.error('Error refreshing application commands.', error);
     throw error;

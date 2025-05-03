@@ -31,7 +31,7 @@ const schema = z.object({
   }),
 });
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('cep-search')
     .setDescription('Search for a CEP (Brazilian ZIP code)')

@@ -13,7 +13,7 @@ import env from '~/env';
 import type { Command } from '~/types/command';
 import { sendError } from '~/utils/sendError';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('ban')
     .setDescription('Ban a member')
@@ -44,7 +44,7 @@ export default <Command>{
     if (user.id === intr.user.id)
       return await sendError(intr, "You can't ban yourself");
     if (user.id === intr.client.user.id)
-      return await sendError(intr, "You can't ban me 0w0");
+      return await sendError(intr, "You can't ban me UwU");
 
     if (user.id === intr.guild?.ownerId)
       return await sendError(intr, "You can't ban the owner of the server");

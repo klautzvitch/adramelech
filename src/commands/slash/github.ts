@@ -74,7 +74,7 @@ const socialsSchema = z.array(
 );
 type Socials = z.infer<typeof socialsSchema>;
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('github')
     .setDescription('Get Github information')

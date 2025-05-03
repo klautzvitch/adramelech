@@ -30,7 +30,7 @@ const nekoImageSchema = z.object({
   url: z.string().url(),
 });
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('anime')
     .setDescription('Anime related commands')

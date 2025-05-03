@@ -7,7 +7,7 @@ import {
 import env from '~/env';
 import type { Command } from '~/types/command';
 
-export default <Command>{
+export const command = <Command>{
   data: new SlashCommandBuilder()
     .setName('dice')
     .setDescription('Roll a dice')
