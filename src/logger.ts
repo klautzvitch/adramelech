@@ -1,44 +1,61 @@
-import { addBreadcrumb, captureException, captureMessage } from '@sentry/bun';
+import { captureException, captureMessage } from '@sentry/bun';
 import chalk from 'chalk';
+import { format } from 'util';
+
+const ICONS = {
+  info: '',
+  success: '',
+  warn: '',
+  error: '',
+};
 
 type LogParams = [message?: unknown, ...params: unknown[]];
+
+function prepareSentryExtra(
+  data: unknown
+): Record<string, unknown> | undefined {
+  if (data === undefined || (Array.isArray(data) && data.length === 0))
+    return undefined;
+
+  // Sentry's captureException/captureMessage can often handle various types,
+  // but wrapping in a structured way is good practice.
+  // Ensure it's serializable if passing complex objects.
+  // For simplicity here, we'll wrap it directly.
+  return { additional_info: data };
+}
 
 function log(...params: LogParams) {
   console.log(...params);
 }
 
 function info(...params: LogParams) {
-  log(chalk.blue(''), ...params);
+  log(chalk.blue(ICONS.info), ...params);
 }
 function success(...params: LogParams) {
-  log(chalk.green(''), ...params);
+  log(chalk.green(ICONS.success), ...params);
 }
 function warn(...params: LogParams) {
-  log(chalk.yellow(''), ...params);
-  captureMessage(`Warning: ${String(params[0])}`, 'warning');
-  addBreadcrumb({
-    category: 'log',
-    level: 'warning',
-    message: params.map(String).join(' '),
-  });
+  log(chalk.yellow(ICONS.warn), ...params);
+
+  const message = format(...params);
+  captureMessage(`Warning: ${message}`, { level: 'warning' });
 }
 function error(...params: LogParams) {
-  log(chalk.red(''), ...params);
+  log(chalk.red(ICONS.error), ...params);
 
-  const potentialError = params[0];
-  const extraData =
-    params.length > 1
-      ? {
-          additional_info: params.slice(1),
-        }
-      : undefined;
+  const [firstParam, ...restParams] = params;
+  const extraData = prepareSentryExtra(restParams);
 
-  if (potentialError instanceof Error) {
-    captureException(potentialError, { extra: extraData });
+  if (firstParam instanceof Error) {
+    // Capture the provide Error object directly to preserve stack trace
+    captureException(firstParam, {
+      extra: extraData,
+    });
   } else {
-    const message = `Logged Error: ${params.map((p) => (typeof p === 'string' ? p : JSON.stringify(p))).join(' ')}`;
-    captureMessage(message, { level: 'error', extra: extraData });
-    captureException(new Error(message), { extra: extraData });
+    const message = format(...params);
+    captureException(new Error(message), {
+      extra: extraData,
+    });
   }
 }
 
