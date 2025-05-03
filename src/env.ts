@@ -5,7 +5,6 @@ import logger from './logger';
 const envSchema = z.object({
   BOT_TOKEN: z.string(),
   BOT_ID: z.string(),
-  SUPPORT_URL: z.string().url().default('https://www.pudim.com.br'),
   PRESENCE_TYPE: z.string().transform(Number),
   PRESENCE_NAME: z.string(),
   EMBED_COLOR: z.string().transform(Number),

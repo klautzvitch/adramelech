@@ -54,12 +54,6 @@ export default <Command>{
                   label: 'Repository',
                   url: env.REPOSITORY_URL,
                 },
-                {
-                  type: ComponentType.Button,
-                  style: ButtonStyle.Link,
-                  label: 'Support',
-                  url: env.SUPPORT_URL,
-                },
               ],
             },
             { type: ComponentType.Separator },
