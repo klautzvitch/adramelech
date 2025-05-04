@@ -1,5 +1,5 @@
 import { captureException, captureMessage } from '@sentry/bun';
-import chalk from 'chalk';
+import kleur from 'kleur';
 import { format } from 'util';
 
 const ICONS = {
@@ -29,19 +29,19 @@ function log(...params: LogParams) {
 }
 
 function info(...params: LogParams) {
-  log(chalk.blue(ICONS.info), ...params);
+  log(kleur.blue(ICONS.info), ...params);
 }
 function success(...params: LogParams) {
-  log(chalk.green(ICONS.success), ...params);
+  log(kleur.green(ICONS.success), ...params);
 }
 function warn(...params: LogParams) {
-  log(chalk.yellow(ICONS.warn), ...params);
+  log(kleur.yellow(ICONS.warn), ...params);
 
   const message = format(...params);
   captureMessage(`Warning: ${message}`, { level: 'warning' });
 }
 function error(...params: LogParams) {
-  log(chalk.red(ICONS.error), ...params);
+  log(kleur.red(ICONS.error), ...params);
 
   const [firstParam, ...restParams] = params;
   const extraData = prepareSentryExtra(restParams);

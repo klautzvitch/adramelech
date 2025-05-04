@@ -1,7 +1,7 @@
-import chalk from 'chalk';
 import { z } from 'zod';
 import logger from './logger';
 import { ActivityType } from 'discord.js';
+import kleur from 'kleur';
 
 const envSchema = z.object({
   BOT_TOKEN: z.string(),
@@ -24,13 +24,13 @@ const envSchema = z.object({
 function validateEnv() {
   const result = envSchema.passthrough().safeParse(Bun.env);
   if (!result.success) {
-    const u = chalk.underline;
+    const u = kleur.underline;
     for (const error of result.error.errors) {
-      logger.error(`ENV VAR  ${u.bold(error.path)} ${error.message}`);
+      logger.error(`ENV VAR  ${u(error.path.toString())} ${error.message}`);
       if (error.code === 'invalid_type')
         logger.log(
-          chalk.dim(
-            `󱞩 Expected: ${u.green(error.expected)} | Received: ${u.red(error.received)}`
+          kleur.dim(
+            `󱞩 Expected: ${u().green(error.expected)} | Received: ${u().red(error.received)}`
           )
         );
     }

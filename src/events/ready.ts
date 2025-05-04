@@ -2,7 +2,7 @@ import { ActivityType, Events, version } from 'discord.js';
 import type { Event } from '~/types/event';
 import type { CustomClient } from '~';
 import logger from '~/logger';
-import chalk from 'chalk';
+import kleur from 'kleur';
 
 export const event = <Event>{
   name: Events.ClientReady,
@@ -10,15 +10,15 @@ export const event = <Event>{
   async execute(client: CustomClient) {
     logger.log();
 
-    const library = `${chalk.magenta(' Discord.js')} ${chalk.reset.dim(version)}`;
-    const runtime = `${chalk.yellow(' Bun')} ${chalk.reset.dim(Bun.version)}`;
+    const library = `${kleur.magenta(' Discord.js')} ${kleur.dim(version)}`;
+    const runtime = `${kleur.yellow(' Bun')} ${kleur.dim(Bun.version)}`;
     logger.log(`${library} / ${runtime}`);
 
-    logger.log(chalk.green(` Online as ${chalk.bold(client.user?.tag)}`));
+    logger.log(kleur.green(` Online as ${kleur.bold(client.user!.tag)}`));
     logger.log(`󱞩 API Version: ${client.options.rest?.version}`);
     const presence = client.user!.presence.activities[0];
     logger.log(
-      chalk.blue(`󱞩 Presence: ${ActivityType[presence.type]} ${presence.name}`)
+      kleur.blue(`󱞩 Presence: ${ActivityType[presence.type]} ${presence.name}`)
     );
   },
 };
