@@ -1,16 +1,21 @@
 import chalk from 'chalk';
 import { z } from 'zod';
 import logger from './logger';
+import { ActivityType } from 'discord.js';
 
 const envSchema = z.object({
   BOT_TOKEN: z.string(),
   BOT_ID: z.string(),
-  PRESENCE_TYPE: z.string().transform(Number),
+  PRESENCE_TYPE: z
+    .string()
+    .nonempty()
+    .transform(Number)
+    .transform((val) => z.nativeEnum(ActivityType).parse(val)),
   PRESENCE_NAME: z.string(),
-  EMBED_COLOR: z.string().transform(Number),
+  EMBED_COLOR: z.string().nonempty().transform(Number),
   AUTHOR_URL: z.string().url().default('https://www.pudim.com.br'),
   REPOSITORY_URL: z.string().url(),
-  DEFAULT_COOLDOWN_SECONDS: z.string().transform(Number),
+  DEFAULT_COOLDOWN_SECONDS: z.string().nonempty().transform(Number),
   FEEDBACK_WEBHOOK: z.string().url().optional(),
   USER_AGENT: z.string().default('adramelech'),
   OPENWEATHER_KEY: z.string().optional(),
