@@ -12,9 +12,9 @@ export default async function registerCommands(client: CustomClient) {
       body: commands,
     })) as unknown[];
 
-    logger.success(`${data.length} commands registered.`);
+    logger.success(`${data.length} commands registered`);
   } catch (error) {
-    logger.error('Error refreshing application commands.', error);
+    logger.error('Error refreshing application commands', error);
     throw error;
   }
 }

@@ -39,6 +39,6 @@ const client = new CustomClient({
 await loadModules(client);
 
 if (client.commands.size > 0) await registerCommands(client);
-else logger.warn('No commands found. Skipping command registration.');
+else logger.warn('No commands found. Skipping command registration');
 
 client.login(env.BOT_TOKEN);

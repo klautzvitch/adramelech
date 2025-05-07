@@ -35,7 +35,7 @@ function addCommand(client: CustomClient, rawCommand: unknown, file: string) {
   const command = result.data as Command;
   if (client.commands.has(command.data.name)) {
     logger.error(
-      `Duplicate command name ${command.data.name} in ${file}. Overwriting.`
+      `Duplicate command name ${command.data.name} in ${file}. Overwriting`
     );
   }
   client.commands.set(command.data.name, command);
@@ -77,7 +77,7 @@ function addComponent(
   const component = result.data;
   if (client.components.has(component.customId)) {
     logger.error(
-      `Duplicate component id ${component.customId} in ${file}. Overwriting.`
+      `Duplicate component id ${component.customId} in ${file}. Overwriting`
     );
   }
   client.components.set(component.customId, component);
@@ -93,7 +93,7 @@ function addModal(client: CustomClient, rawModal: unknown, file: string) {
   const modal = result.data;
   if (client.modals.has(modal.customId)) {
     logger.error(
-      `Duplicate modal id ${modal.customId} in ${file}. Overwriting.`
+      `Duplicate modal id ${modal.customId} in ${file}. Overwriting`
     );
   }
   client.modals.set(modal.customId, modal);
@@ -179,6 +179,6 @@ export async function loadModules(client: CustomClient) {
   }
 
   logger.info(
-    `Loaded ${loadedCounts.commands} commands, ${loadedCounts.events} events, ${loadedCounts.components} components, and ${loadedCounts.modals} modals.`
+    `Loaded ${loadedCounts.commands} commands, ${loadedCounts.events} events, ${loadedCounts.components} components, and ${loadedCounts.modals} modals`
   );
 }
